@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'package:audiorecorder/core/presentation/app/echo_app.dart';
 import 'package:audiorecorder/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
   await initDependencies();
-  runApp(const MyApp());
+  runApp(const EchoApp());
 }
 
 class MyApp extends StatelessWidget {
