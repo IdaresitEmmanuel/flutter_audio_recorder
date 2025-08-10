@@ -17,10 +17,14 @@ import UIKit
     func setUpFlutterMethodChannels(_ controller: FlutterViewController){
         // Set Up MethodChannel
         let methodChannel = FlutterMethodChannel(name: "com.hyequest.audiorecorder.methodchannel", binaryMessenger:
-                                                controller.binaryMessenger)
+                                                    controller.binaryMessenger)
         methodChannel.setMethodCallHandler(HyeFlutterMethodHandler.handle)
-        // Set up EventChannel
-        let eventChannel = FlutterEventChannel(name: "com.hyequest.audiorecorder.waveform_eventchannel", binaryMessenger: controller.binaryMessenger)
-        eventChannel.setStreamHandler(AudioRecorderEventStreamHandler())
+        // Set up Recorder Waveform EventChannel
+        let recorderWaveformEventChannel = FlutterEventChannel(name: "com.hyequest.audiorecorder.recorder_waveform_eventchannel", binaryMessenger: controller.binaryMessenger)
+        recorderWaveformEventChannel.setStreamHandler(AudioRecorderWaveformStreamHandler())
+        
+        // Set up Recorder Status EventChannel
+        let recorderStatusEventChannel = FlutterEventChannel(name: "com.hyequest.audiorecorder.recorder_status_eventchannel", binaryMessenger: controller.binaryMessenger)
+        recorderStatusEventChannel.setStreamHandler(AudioRecorderStatusStreamHandler())
     }
 }

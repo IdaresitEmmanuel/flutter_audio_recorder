@@ -5,7 +5,7 @@
 //  Created by Emmanuel Idaresit on 08/08/2025.
 //
 
-class AudioRecorderEventStreamHandler: NSObject, FlutterStreamHandler {
+class AudioRecorderWaveformStreamHandler: NSObject, FlutterStreamHandler {
     private var eventSink: FlutterEventSink?
  
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {

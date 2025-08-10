@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 void main() async {
   await initDependencies();
   runApp(const EchoApp());
+  // runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -35,55 +36,109 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final mc = MethodChannel("com.hyequest.audiorecorder.methodchannel");
-  final ec = EventChannel("com.hyequest.audiorecorder.waveform_eventchannel");
-  var dataList = <String>[];
-  StreamSubscription? ecSubscription;
+  final wc = EventChannel(
+    "com.hyequest.audiorecorder.recorder_waveform_eventchannel",
+  );
+  final sc = EventChannel(
+    "com.hyequest.audiorecorder.recorder_status_eventchannel",
+  );
+
+  var dataList = <Map<dynamic, dynamic>>[];
+  var status = "";
+  StreamSubscription? wcSubscription;
+  StreamSubscription? scSubscription;
   start() async {
     try {
-      listen();
+      listenForWaves();
+      listenForStatus();
       await mc.invokeMethod("startRecorder");
     } catch (e) {
       print("o shit: $e");
     }
   }
 
-  listen() {
-    ecSubscription?.cancel();
+  listenForWaves() {
+    wcSubscription?.cancel();
     print("flutter:: receiveBroadcastStream");
-    ecSubscription = ec.receiveBroadcastStream().listen((data) {
-      print("data: $data");
+    wcSubscription = wc.receiveBroadcastStream().listen((data) {
+      // print("data: $data");
       setState(() {
-        dataList.add(data.toString());
+        dataList.add(data);
+      });
+    });
+  }
+
+  listenForStatus() {
+    scSubscription?.cancel();
+    print("flutter:: receiveBroadcastStream");
+    scSubscription = sc.receiveBroadcastStream().listen((data) {
+      // print("data: $data");
+      setState(() {
+        status = data.toString();
       });
     });
   }
 
   stop() async {
     await mc.invokeMethod("stopRecorder");
-    ecSubscription?.cancel();
+    wcSubscription?.cancel();
+    scSubscription?.cancel();
+  }
+
+  @override
+  void dispose() {
+    stop();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Container(
-        width: double.maxFinite,
-        height: double.maxFinite,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Wrap(children: dataList.map((d) => Text(d.toString())).toList()),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(onPressed: start, icon: Icon(Icons.mic)),
-                IconButton(onPressed: listen, icon: Icon(Icons.play_arrow)),
-                IconButton(onPressed: () {}, icon: Icon(Icons.pause)),
-                IconButton(onPressed: stop, icon: Icon(Icons.stop)),
-              ],
-            ),
-          ],
+      body: SafeArea(
+        child: Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Wrap(children: dataList.map((d) => Text(d.toString())).toList()),
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: ListView(
+                        children: dataList.isEmpty
+                            ? []
+                            : [Text(dataList.last.toString())],
+                      ),
+                    ),
+                    Flexible(child: Center(child: Text(status))),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(onPressed: start, icon: Icon(Icons.mic)),
+                  IconButton(
+                    onPressed: () {
+                      mc.invokeMethod("resumeRecorder");
+                    },
+                    icon: Icon(Icons.play_arrow),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      mc.invokeMethod("pauseRecorder");
+                    },
+                    icon: Icon(Icons.pause),
+                  ),
+                  IconButton(onPressed: stop, icon: Icon(Icons.stop)),
+                ],
+              ),
+              SizedBox(height: 50),
+            ],
+          ),
         ),
       ),
     );

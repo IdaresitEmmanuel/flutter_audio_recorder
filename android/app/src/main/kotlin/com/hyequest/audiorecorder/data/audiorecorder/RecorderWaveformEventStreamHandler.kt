@@ -1,8 +1,8 @@
-package com.hyequest.audiorecorder.data
+package com.hyequest.audiorecorder.data.audiorecorder
 
 import io.flutter.plugin.common.EventChannel
 
-class WaveformEventStreamHandler : EventChannel.StreamHandler {
+class RecorderWaveformEventStreamHandler : EventChannel.StreamHandler {
     private var eventSink: EventChannel.EventSink? = null
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {

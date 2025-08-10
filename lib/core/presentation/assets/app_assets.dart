@@ -18,7 +18,7 @@ class _Images {
   const _Images();
 
   static const prefix = "assets/images/";
-  final backgroundSvg = "${prefix}background.svg";
+  final backgroundSvg = "${prefix}background.png";
   final echoLogo = "${prefix}echo_logo.png";
   final waveForm = "${prefix}wave_form.png";
 }
