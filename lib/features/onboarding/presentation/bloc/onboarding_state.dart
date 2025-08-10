@@ -9,7 +9,7 @@ abstract class OnboardingState extends Equatable {
   const OnboardingState({this.status, this.error});
 
   @override
-  List<Object> get props => [status!, error!];
+  List<Object?> get props => [status, error];
 }
 
 class OnboardingLoading extends OnboardingState {

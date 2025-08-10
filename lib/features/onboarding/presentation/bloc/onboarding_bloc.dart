@@ -20,6 +20,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     GetOnboardingStatus event,
     Emitter<OnboardingState> emit,
   ) async {
+    
     final dataState = await _getOnboardingStatusUseCase();
 
     if (dataState is DataSuccess && dataState.data != null) {

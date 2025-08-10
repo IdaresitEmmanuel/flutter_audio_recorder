@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:audiorecorder/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
+  await initDependencies();
   runApp(const MyApp());
 }
 
@@ -50,8 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ecSubscription = ec.receiveBroadcastStream().listen((data) {
       print("data: $data");
       setState(() {
-        
-      dataList.add(data.toString());
+        dataList.add(data.toString());
       });
     });
   }
