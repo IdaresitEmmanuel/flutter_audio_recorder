@@ -2,7 +2,7 @@
 //  RecordStatusModel.swift
 //  Runner
 //
-//  Created by Hyebreed on 10/08/2025.
+//  Created by Emmanuel Idaresit on 10/08/2025.
 //
 import Foundation
 

@@ -1,4 +1,5 @@
 import 'package:audiorecorder/core/presentation/assets/app_assets.dart';
+import 'package:audiorecorder/core/presentation/router/app_router.dart';
 import 'package:audiorecorder/core/presentation/theme/colors.dart';
 import 'package:audiorecorder/core/presentation/theme/dimensions.dart';
 import 'package:audiorecorder/core/presentation/widgets/app_action_button.dart';
@@ -19,6 +20,7 @@ class _OnboardingComponentState extends State<OnboardingComponent> {
   @override
   Widget build(BuildContext context) {
     return EchoScaffold(
+      key: Key('onboarding'),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -72,9 +74,10 @@ class _OnboardingComponentState extends State<OnboardingComponent> {
                 horizontal: AppDimensions.pageMargin,
               ),
               child: AppActionButton(
+                key: Key("getstarted"),
                 onPressed: () {
                   sl.get<OnboardingBloc>().add(SetOnboardingStatus());
-                  // TODO: Go to Recording Screen
+                  AppRouter.goToAudioRecorderScreen(context);
                 },
                 text: "Get Started",
               ),

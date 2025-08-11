@@ -1,3 +1,4 @@
+import 'package:audiorecorder/features/audio_recorder/presentation/pages/audio_recorder_screen.dart';
 import 'package:audiorecorder/features/onboarding/presentation/pages/onboarding_screen.dart';
 import 'package:flutter/widgets.dart';
 
@@ -10,5 +11,9 @@ class AppRouter {
 
   static Future<dynamic> goToOnboardingScreen(BuildContext context) {
     return Navigator.pushNamed(context, OnboardingScreen.path);
+  }
+
+  static Future<dynamic> goToAudioRecorderScreen(BuildContext context) {
+    return Navigator.pushNamed(context, AudioRecorderScreen.path);
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:audiorecorder/core/presentation/assets/app_assets.dart';
@@ -21,7 +23,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
+    
     _checkAndNavigate();
+
   }
 
   @override
@@ -35,14 +39,13 @@ class _SplashScreenState extends State<SplashScreen> {
     _streamSubscription?.cancel();
     _streamSubscription = bloc.stream.listen((state) {
       if (state is OnboardingDone) {
+        if (!context.mounted) return;
         if (state.status?.lastOnboardingCompletedAt == null) {
           // go to onboarding screen
-          if (context.mounted) {
-            // ignore: use_build_context_synchronously
-            AppRouter.goToOnboardingScreen(context);
-          }
+          AppRouter.goToOnboardingScreen(context);
         } else {
           // go to main screen
+          AppRouter.goToAudioRecorderScreen(context);
         }
       }
     });
@@ -52,6 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: Key('splash'),
       body: Center(child: Image.asset(AppAssets.images.echoLogo)),
     );
   }
