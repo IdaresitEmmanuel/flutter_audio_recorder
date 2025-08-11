@@ -1,11 +1,14 @@
 import 'package:equatable/equatable.dart';
 
-class AudioRecorderState extends Equatable {
+class AudioRecorderStatus extends Equatable {
   final bool isRecording;
   final Duration recordDuration;
 
-  const AudioRecorderState({required this.isRecording, required this.recordDuration});
-  
+  const AudioRecorderStatus({
+    required this.isRecording,
+    required this.recordDuration,
+  });
+
   @override
   List<Object?> get props => [isRecording, recordDuration];
 }

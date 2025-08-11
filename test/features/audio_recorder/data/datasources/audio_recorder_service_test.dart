@@ -98,7 +98,7 @@ void main() {
       () => mockAudioRecorderStateChannel.receiveBroadcastStream()  as Stream<Map<String, dynamic>>,
     ).thenAnswer((_) => Stream.fromIterable(data));
 
-    audioRecorderService.stateStream();
+    audioRecorderService.statusStream();
 
     verify(() => mockAudioRecorderStateChannel.receiveBroadcastStream());
   });

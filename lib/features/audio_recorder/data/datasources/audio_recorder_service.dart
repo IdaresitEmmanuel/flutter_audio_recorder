@@ -7,7 +7,7 @@ abstract class IAudioRecorderService {
   Future<bool?> stop();
 
   Stream<Map<String, dynamic>?> pcmStream();
-  Stream<Map<String, dynamic>?> stateStream();
+  Stream<Map<String, dynamic>?> statusStream();
 }
 
 class AudioRecorderService extends IAudioRecorderService {
@@ -48,7 +48,7 @@ class AudioRecorderService extends IAudioRecorderService {
   }
 
   @override
-  Stream<Map<String, dynamic>?> stateStream() {
+  Stream<Map<String, dynamic>?> statusStream() {
     return _audioRecorderStateEventChannel.receiveBroadcastStream()
         as Stream<Map<String, dynamic>?>;
   }

@@ -10,7 +10,7 @@ class MockAudioRecorderRepository extends Mock
 void main() async {
   final mockAudioRecorderRepository = MockAudioRecorderRepository();
   final getPcmStreamUsecase = GetPcmStreamUsecase(mockAudioRecorderRepository);
-  test('should call startRecording and return DataState', () async {
+  test('should call pcmStream and return AudioRecorderPcm', () async {
     const entity = AudioRecorderPcm(timestamp: Duration.zero, data: []);
     when(
       () => mockAudioRecorderRepository.pcmStream(),

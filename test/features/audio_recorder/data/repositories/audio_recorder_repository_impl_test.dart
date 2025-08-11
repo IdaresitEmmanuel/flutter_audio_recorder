@@ -1,7 +1,7 @@
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/audio_recorder_service.dart';
 import 'package:audiorecorder/features/audio_recorder/data/models/audio_recorder_pcm_model.dart';
-import 'package:audiorecorder/features/audio_recorder/data/models/audio_recorder_state_model.dart';
+import 'package:audiorecorder/features/audio_recorder/data/models/audio_recorder_status_model.dart';
 import 'package:audiorecorder/features/audio_recorder/data/repositories/audio_recorder_repository_impl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -178,31 +178,31 @@ void main() {
     verify(() => mockAudioRecorderService.pcmStream());
   });
 
-  test('should convert map to AudioRecorderStateModel and ignore nulls', () {
+  test('should convert map to AudioRecorderStatusModel and ignore nulls', () {
     final data = [
       {"isRecording": true, "recordDuration": 45.6},
       null,
       {"isRecording": false, "recordDuration": 456.2},
     ];
     final models = [
-      AudioRecorderStateModel(
+      AudioRecorderStatusModel(
         isRecording: true,
         recordDuration: Duration(seconds: 45.6.toInt()),
       ),
-      AudioRecorderStateModel(
+      AudioRecorderStatusModel(
         isRecording: false,
         recordDuration: Duration(seconds: 456.2.toInt()),
       ),
     ];
 
     when(
-      () => mockAudioRecorderService.stateStream(),
+      () => mockAudioRecorderService.statusStream(),
     ).thenAnswer((_) => Stream.fromIterable(data));
 
-    final result = audioRecorderRepositoryImpl.stateStream();
+    final result = audioRecorderRepositoryImpl.statusStream();
 
     expectLater(result, emitsInOrder([...models, emitsDone]));
 
-    verify(() => mockAudioRecorderService.stateStream());
+    verify(() => mockAudioRecorderService.statusStream());
   });
 }

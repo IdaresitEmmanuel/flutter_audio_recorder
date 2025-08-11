@@ -3,7 +3,7 @@ import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/audio_recorder_service.dart';
 import 'package:audiorecorder/features/audio_recorder/data/models/audio_recorder_pcm_model.dart';
-import 'package:audiorecorder/features/audio_recorder/data/models/audio_recorder_state_model.dart';
+import 'package:audiorecorder/features/audio_recorder/data/models/audio_recorder_status_model.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/repositories/audio_recorder_repository.dart';
 import 'package:dartz/dartz.dart';
 
@@ -75,10 +75,10 @@ class AudioRecorderRepositoryImpl implements AudioRecorderRepository {
   }
 
   @override
-  Stream<AudioRecorderStateModel> stateStream() {
+  Stream<AudioRecorderStatusModel> statusStream() {
     return _audioRecorderService
-        .stateStream()
+        .statusStream()
         .where((data) => data != null)
-        .map((data) => AudioRecorderStateModel.fromMap(data!));
+        .map((data) => AudioRecorderStatusModel.fromMap(data!));
   }
 }
