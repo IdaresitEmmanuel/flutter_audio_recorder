@@ -1,4 +1,14 @@
 import 'package:audiorecorder/core/platform_channels/platform_channels.dart';
+import 'package:audiorecorder/features/audio_playback/data/datasources/audio_tag_helper.dart';
+import 'package:audiorecorder/features/audio_playback/data/datasources/path_finder.dart';
+import 'package:audiorecorder/features/audio_playback/data/datasources/permission_manager.dart';
+import 'package:audiorecorder/features/audio_playback/data/datasources/platform_checker.dart';
+import 'package:audiorecorder/features/audio_playback/data/repositories/audio_library_repository_impl.dart';
+import 'package:audiorecorder/features/audio_playback/domain/repositories/audio_library_repository.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/delete_audio_file.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/get_audio_files.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/request_storage_permission.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/audio_recorder_service.dart';
 import 'package:audiorecorder/features/audio_recorder/data/repositories/audio_recorder_repository_impl.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/repositories/audio_recorder_repository.dart';
@@ -16,6 +26,7 @@ import 'package:audiorecorder/features/onboarding/domain/repositories/onboarding
 import 'package:audiorecorder/features/onboarding/domain/usecases/get_onboarding_status.dart';
 import 'package:audiorecorder/features/onboarding/domain/usecases/set_onboarding_status.dart';
 import 'package:audiorecorder/features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,6 +71,8 @@ Future<void> _registerServices() async {
   // Shared Preferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(sharedPreferences);
+  // Device Info Plugin
+  sl.registerSingleton<DeviceInfoPlugin>(DeviceInfoPlugin());
   // Method Channels
   sl.registerSingleton<MethodChannel>(PlatformChannels.methodChannel);
   // Event Channels
@@ -72,6 +85,12 @@ Future<void> _registerServices() async {
       PlatformChannels.audioRecorderStateEventChannel,
       instanceName: 'audioRecorderStateEventChannel',
     );
+  // audio playback
+  sl
+    ..registerSingleton<AudioTagHelper>(AudioTagHelper())
+    ..registerSingleton<PathFinder>(PathFinder())
+    ..registerSingleton<PermissionManager>(PermissionManager.instance)
+    ..registerSingleton<PlatformChecker>(PlatformChecker());
 }
 
 _registerAPIs() {
@@ -93,6 +112,10 @@ _registerRepositories() {
   // Audio Recorder
   sl.registerSingleton<AudioRecorderRepository>(
     AudioRecorderRepositoryImpl(sl()),
+  );
+  // Audio Playback
+  sl.registerSingleton<AudioLibraryRepository>(
+    AudioLibraryRepositoryImpl(sl(), sl(), sl(), sl(), sl()),
   );
 }
 
@@ -118,6 +141,13 @@ _registerUsecases() {
     ..registerSingleton<GetRecorderStatusStreamUsecase>(
       GetRecorderStatusStreamUsecase(sl()),
     );
+  // Audio Playback
+  sl
+    ..registerSingleton<RequestStoragePermissionUsecase>(
+      RequestStoragePermissionUsecase(sl()),
+    )
+    ..registerSingleton<GetAudioFilesUsecase>(GetAudioFilesUsecase(sl()))
+    ..registerSingleton<DeleteAudioFileUsecase>(DeleteAudioFileUsecase(sl()));
 }
 
 _registerBlocs() {
@@ -126,5 +156,9 @@ _registerBlocs() {
   // Audio Recorder
   sl.registerFactory<AudioRecorderBloc>(
     () => AudioRecorderBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl()),
+  );
+  // Audio Playback
+  sl.registerFactory<AudioPlaybackBloc>(
+    () => AudioPlaybackBloc(sl(), sl(), sl()),
   );
 }

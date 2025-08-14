@@ -68,7 +68,7 @@ void main() {
         // Trigger navigation by emitting the state
         await tester.pumpAndSettle();
 
-        expect(find.byKey(ValueKey('audioRecorder')), findsOneWidget);
+        expect(find.byKey(ValueKey('audioPlayback')), findsOneWidget);
       },
     );
   });

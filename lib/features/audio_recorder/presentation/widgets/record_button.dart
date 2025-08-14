@@ -22,11 +22,6 @@ class _RecordButtonState extends State<RecordButton>
 
   Curve get animationCurve => Curves.easeInOut;
 
-  _togglePause() {
-    setState(() {
-      isPaused = !isPaused;
-    });
-  }
 
   @override
   void initState() {

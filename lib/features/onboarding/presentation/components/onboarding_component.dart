@@ -77,7 +77,10 @@ class _OnboardingComponentState extends State<OnboardingComponent> {
                 key: Key("getstarted"),
                 onPressed: () {
                   sl.get<OnboardingBloc>().add(SetOnboardingStatus());
-                  AppRouter.goToAudioRecorderScreen(context);
+                  AppRouter.goToAudioPlaybackScreen(
+                    context,
+                    routeReplacement: RouteReplacement.all,
+                  );
                 },
                 text: "Get Started",
               ),

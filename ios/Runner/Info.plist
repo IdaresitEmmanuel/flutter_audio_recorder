@@ -47,5 +47,7 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Microphone permission is needed to record audio</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your library to save and retrieve audio files.</string>
 </dict>
 </plist>

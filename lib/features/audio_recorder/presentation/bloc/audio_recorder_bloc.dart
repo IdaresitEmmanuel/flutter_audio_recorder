@@ -12,7 +12,6 @@ import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_reco
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_event.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {

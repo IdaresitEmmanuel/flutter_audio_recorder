@@ -40,10 +40,16 @@ class _SplashScreenState extends State<SplashScreen> {
         if (!context.mounted) return;
         if (state.status?.lastOnboardingCompletedAt == null) {
           // go to onboarding screen
-          AppRouter.goToOnboardingScreen(context);
+          AppRouter.goToOnboardingScreen(
+            context,
+            routeReplacement: RouteReplacement.current,
+          );
         } else {
           // go to main screen
-          AppRouter.goToAudioRecorderScreen(context);
+          AppRouter.goToAudioPlaybackScreen(
+            context,
+            routeReplacement: RouteReplacement.current,
+          );
         }
       }
     });

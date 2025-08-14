@@ -43,6 +43,6 @@ void main() {
     // trigger navigation
     await tester.pumpAndSettle();
     // verify navigation to recorder screen
-    expect(find.byKey(ValueKey('audioRecorder')), findsOneWidget);
+    expect(find.byKey(ValueKey('audioPlayback')), findsOneWidget);
   });
 }
