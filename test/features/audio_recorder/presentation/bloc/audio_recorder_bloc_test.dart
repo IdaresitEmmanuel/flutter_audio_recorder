@@ -161,7 +161,7 @@ void main() {
     },
   );
 
-  group('_onStopAudioRecorder', () {
+  group('_onGetPcmStreamUsecase', () {
     final entity = AudioRecorderPcm(timestamp: Duration.zero, data: []);
     blocTest(
       'should call pcm stream and emit active state',
@@ -175,7 +175,9 @@ void main() {
         mockGetRecorderStatusStreamUsecase,
       ),
       setUp: () {
-        
+        when(
+          () => mockGetPcmStreamUsecase(),
+        ).thenAnswer((_) => Stream.value(entity));
       },
       act: (bloc) => bloc.add(GetAudioRecorderPcmStream()),
       verify: (bloc) {

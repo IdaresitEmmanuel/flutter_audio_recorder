@@ -33,7 +33,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   _checkAndNavigate() async {
-    await Future.delayed(Duration(seconds: 2));
     final bloc = sl.get<OnboardingBloc>();
     _streamSubscription?.cancel();
     _streamSubscription = bloc.stream.listen((state) {

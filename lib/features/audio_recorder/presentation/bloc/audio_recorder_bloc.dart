@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
-import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_pcm.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_status.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_recorder_status_stream.dart';
@@ -13,8 +12,8 @@ import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_reco
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_event.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rxdart/subjects.dart';
 
 class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
   final RequestRecordPermissionUsecase _recordPermissionUsecase;
@@ -42,27 +41,9 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     on<GetAudioRecorderStatusStream>(_onGetAudioRecorderStatusStream);
   }
 
-  StreamSubscription? _pcmStreamSubscription;
-  Timer? pcmSmoothTimer;
- BehaviorSubject<List<AudioRecorderPcm>> pcmStreamController =
-      BehaviorSubject.seeded([], sync: true);
-  // final StreamController<List<AudioRecorderPcm>> pcmStreamController =
-  //     StreamController();
-  List<AudioRecorderPcm> pcmBuffer = [];
-
   init() async {
-    _startSmoothPcm();
     add(GetAudioRecorderPcmStream());
     add(GetAudioRecorderStatusStream());
-  }
-
-  @override
-  Future<void> close() {
-    pcmSmoothTimer?.cancel();
-    pcmStreamController.close();
-    _pcmStreamSubscription?.cancel();
-    pcmBuffer.clear();
-    return super.close();
   }
 
   Future<void> _onRequestRecordPermission(
@@ -72,10 +53,8 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     final result = await _recordPermissionUsecase();
     if (result is DataFailure) {
       EchoLogger.e(result.error.toString());
-      // return true;
     } else {
       EchoLogger.i("Recorder Started");
-      // return false;
     }
   }
 
@@ -130,19 +109,12 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     }
   }
 
-  _startSmoothPcm() async {
-    _pcmStreamSubscription?.cancel();
-    pcmSmoothTimer = Timer.periodic(const Duration(microseconds: 100), (timer) {
-      pcmStreamController.add(pcmBuffer);
-    });
-  }
-
   void _onGetAudioRecorderPcmStream(
     GetAudioRecorderPcmStream event,
     Emitter<AudioRecorderState> emit,
   ) async {
-    // Use await for to process each item from the stream.
-    // The event handler will wait here until the stream closes.
+    // Await stream for safe emit call
+    // because emitter becomes invalid when this function returns
     await for (final pcm in _pcmStreamUsecase()) {
       final newState = state is AudioRecorderStateActive
           ? (state as AudioRecorderStateActive).copyWith(
@@ -155,9 +127,6 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
               ),
               pcm: [pcm],
             );
-      pcmBuffer.add(pcm);
-      // This emit() call is now safe because the handler is still active.
-      // log(pcm.toString());
       emit(newState);
     }
   }
@@ -166,13 +135,12 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     GetAudioRecorderStatusStream event,
     Emitter<AudioRecorderState> emit,
   ) async {
-    // Use await for to process each item from the stream.
-    // This keeps the event handler running until the stream is closed.
+    // Await stream for safe emit call
+    // because emitter becomes invalid when this function returns
     await for (final status in _recorderStatusStreamUsecase()) {
       final newState = state is AudioRecorderStateActive
           ? (state as AudioRecorderStateActive).copyWith(recorderStatus: status)
           : AudioRecorderStateActive(recorderStatus: status, pcm: []);
-      // The emit() call is now safe because the handler is still active.
       emit(newState);
     }
   }

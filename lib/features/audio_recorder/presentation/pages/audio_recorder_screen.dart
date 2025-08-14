@@ -9,9 +9,13 @@ class AudioRecorderScreen extends StatelessWidget {
   static const path = '/audioRecorder';
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AudioRecorderBloc>(
-      create: (context) => sl.get<AudioRecorderBloc>(),
-      child: AudioRecorderComponent(),
-    );
+    // To make widget test on screens that navigate to this work
+    bool isResitered = sl.isRegistered<AudioRecorderBloc>();
+    return !isResitered
+        ? AudioRecorderComponent()
+        : BlocProvider<AudioRecorderBloc>(
+            create: (context) => sl.get<AudioRecorderBloc>(),
+            child: AudioRecorderComponent(),
+          );
   }
 }
