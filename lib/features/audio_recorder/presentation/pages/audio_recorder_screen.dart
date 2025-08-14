@@ -9,13 +9,18 @@ class AudioRecorderScreen extends StatelessWidget {
   static const path = '/audioRecorder';
   @override
   Widget build(BuildContext context) {
+    bool shouldStartRecording =
+        ModalRoute.of(context)?.settings.arguments as bool? ?? false;
     // To make widget test on screens that navigate to this work
-    bool isResitered = sl.isRegistered<AudioRecorderBloc>();
-    return !isResitered
-        ? AudioRecorderComponent()
+    bool isRegistered = sl.isRegistered<AudioRecorderBloc>();
+
+    return !isRegistered
+        ? AudioRecorderComponent(shouldStartRecording: shouldStartRecording)
         : BlocProvider<AudioRecorderBloc>(
             create: (context) => sl.get<AudioRecorderBloc>(),
-            child: AudioRecorderComponent(),
+            child: AudioRecorderComponent(
+              shouldStartRecording: shouldStartRecording,
+            ),
           );
   }
 }

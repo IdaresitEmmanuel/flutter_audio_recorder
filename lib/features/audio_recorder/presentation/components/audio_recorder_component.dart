@@ -13,8 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AudioRecorderComponent extends StatefulWidget {
-  const AudioRecorderComponent({super.key});
-
+  const AudioRecorderComponent({super.key, required this.shouldStartRecording});
+  final bool shouldStartRecording;
   @override
   State<AudioRecorderComponent> createState() => _AudioRecorderComponentState();
 }
@@ -23,10 +23,14 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
   AudioRecorderBloc? get bloc => !sl.isRegistered<AudioRecorderBloc>()
       ? null
       : BlocProvider.of<AudioRecorderBloc>(context);
+
   @override
   void initState() {
     super.initState();
     bloc?.init();
+    if (widget.shouldStartRecording) {
+      bloc?.add(StartAudioRecorder());
+    }
   }
 
   @override
@@ -83,10 +87,7 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
                 children: [
                   MediaButton(
                     assetIconPath: AppAssets.icons.plus,
-                    onTap: () {
-                      // TODO: use as start for now and remove later
-                      bloc?.add(StartAudioRecorder());
-                    },
+                    onTap: () {},
                   ),
                   SizedBox(height: 24),
                   MediaButtonLabel("New"),

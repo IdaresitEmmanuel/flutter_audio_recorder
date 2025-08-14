@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 var pcmmm = <List<double>>[];
 void main() async {
   await initDependencies();
-  debugRepaintRainbowEnabled = true;
+  // debugRepaintRainbowEnabled = true;
   runApp(const EchoApp());
   // runApp(const MyApp());
 }

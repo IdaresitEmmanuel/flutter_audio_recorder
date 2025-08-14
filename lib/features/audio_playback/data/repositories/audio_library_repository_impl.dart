@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audio_metadata_reader/audio_metadata_reader.dart';
 import 'package:audiorecorder/core/constants/constants.dart';
 import 'package:audiorecorder/core/resources/data_error.dart';
 import 'package:audiorecorder/core/resources/data_state.dart';
@@ -11,7 +12,6 @@ import 'package:audiorecorder/features/audio_playback/data/datasources/platform_
 import 'package:audiorecorder/features/audio_playback/data/models/audio_record_model.dart';
 import 'package:audiorecorder/features/audio_playback/domain/entity/audio_file.dart';
 import 'package:audiorecorder/features/audio_playback/domain/repositories/audio_library_repository.dart';
-import 'package:audiotags/audiotags.dart';
 import 'package:dartz/dartz.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -96,8 +96,8 @@ class AudioLibraryRepositoryImpl implements AudioLibraryRepository {
         String path = audioFile.path;
         String title = path.split('/').last;
         DateTime createdAt = await audioFile.lastModified();
-        Tag? tag = await _audioTags.read(path);
-        Duration duration = Duration(seconds: tag?.duration ?? 0);
+        AudioMetadata tag = _audioTags.read(audioFile);
+        Duration duration = tag.duration ?? Duration.zero;
 
         final model = AudioFileModel(
           title: title,

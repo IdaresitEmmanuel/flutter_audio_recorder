@@ -1,4 +1,16 @@
+import 'package:audiorecorder/core/presentation/assets/app_assets.dart';
+import 'package:audiorecorder/core/presentation/router/app_router.dart';
+import 'package:audiorecorder/core/presentation/theme/colors.dart';
+import 'package:audiorecorder/core/presentation/widgets/app_icon.dart';
+import 'package:audiorecorder/core/presentation/widgets/echo_scaffold.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_event.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/widgets/audio_list_item.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/widgets/persistent_divider.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/widgets/playback_sliver_appbar.dart';
+import 'package:audiorecorder/service_locator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AudioPlaybackComponent extends StatefulWidget {
   const AudioPlaybackComponent({super.key});
@@ -8,8 +20,90 @@ class AudioPlaybackComponent extends StatefulWidget {
 }
 
 class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
+  AudioPlaybackBloc? get bloc => !sl.isRegistered<AudioPlaybackBloc>()
+      ? null
+      : BlocProvider.of<AudioPlaybackBloc>(context);
+
+  final ScrollController _scrollController = ScrollController();
+  bool _isAppBarCollapsed = false;
+  double expandedHeight = 300.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    bloc?.add(RequestStoragePermission());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    double collapseOffset = expandedHeight - kToolbarHeight;
+    final bool collapsed =
+        _scrollController.hasClients &&
+        _scrollController.offset >= collapseOffset;
+
+    if (_isAppBarCollapsed != collapsed) {
+      setState(() {
+        _isAppBarCollapsed = collapsed;
+      });
+    }
+  }
+
+  _startRecording() {
+    AppRouter.goToAudioRecorderScreen(context, argument: true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(key: Key('audioPlayback'));
+    return EchoScaffold(
+      key: Key('audioPlayback'),
+      floatingActionButton: !_isAppBarCollapsed
+          ? null
+          : SizedBox(
+              height: 82.0,
+              width: 82.0,
+              child: FittedBox(
+                child: FloatingActionButton(
+                  onPressed: _startRecording,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadiusGeometry.circular(30),
+                  ),
+                  backgroundColor: AppColors.primary,
+                  child: AppIcon(
+                    AppAssets.icons.mic,
+                    color: Colors.white,
+                    size: Size(30, 30),
+                  ),
+                ),
+              ),
+            ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          playbackSliverAppbar(
+            context,
+            expandedHeight: expandedHeight,
+            onStartRecording: _startRecording,
+          ),
+          SliverPersistentHeader(delegate: PersistentDivider(height: 3)),
+          SliverToBoxAdapter(child: SizedBox(height: 40)),
+          SliverList.separated(
+            itemCount: 20,
+            separatorBuilder: (context, index) {
+              return SizedBox(height: 12);
+            },
+            itemBuilder: (context, index) {
+              return AudioListItem();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

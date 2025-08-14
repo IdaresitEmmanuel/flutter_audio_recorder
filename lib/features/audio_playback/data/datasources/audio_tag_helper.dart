@@ -1,5 +1,8 @@
-import 'package:audiotags/audiotags.dart';
+import 'dart:io';
+
+import 'package:audio_metadata_reader/audio_metadata_reader.dart';
+
 
 class AudioTagHelper {
-  Future<Tag?> read(String path) => AudioTags.read(path);
+  AudioMetadata read(File file) => readMetadata(file, getImage: false);
 }

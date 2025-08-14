@@ -38,7 +38,7 @@ class AppRouter {
 
   static Future<dynamic> goToAudioPlaybackScreen(
     BuildContext context, {
-    dynamic argument,
+    bool? argument,
     RouteReplacement routeReplacement = RouteReplacement.none,
   }) {
     return _toRoute(
