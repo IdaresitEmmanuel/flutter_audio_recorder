@@ -11,6 +11,15 @@ class HyeFlutterMethodHandler {
     
     static func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult){
         switch call.method {
+        case "requestMicrophonePermission":
+            Task{
+                do{
+                   let granted = try await audioRecorder.setUp()
+                    result(granted)
+                } catch {
+                    result(FlutterError(code: "RECORDER_PERMISSION_ERROR", message: "Unable to setup recorder", details:"\(error)"))
+                }
+            }
         case "startRecorder":
             Task{
                 do{

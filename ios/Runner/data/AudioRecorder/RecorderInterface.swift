@@ -8,6 +8,7 @@
 
     enum RecorderError : Error {
         case missingMicrophonePermission
+        case inputNotAvailable
         case unexpectedStatus(OSStatus)
     }
 

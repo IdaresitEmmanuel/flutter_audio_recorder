@@ -1,5 +1,7 @@
 abstract class AudioRecorderEvent {}
 
+class RequestRecordPermission extends AudioRecorderEvent{}
+
 class StartAudioRecorder extends AudioRecorderEvent{}
 
 class PauseAudioRecorder extends AudioRecorderEvent{}

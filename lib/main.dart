@@ -1,12 +1,34 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:audiorecorder/core/presentation/app/echo_app.dart';
 import 'package:audiorecorder/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+List<List<double>> generatePcmData({
+  required int durationInSeconds,
+  int sampleRate = 44100, // Common sample rate
+  double frequency = 440.0, // A standard A4 note
+}) {
+  final int totalSamples = sampleRate * durationInSeconds;
+  final List<double> samples = List.generate(totalSamples, (i) {
+    // Calculate the time for the current sample
+    final double time = i / sampleRate;
+
+    // Generate a sine wave value. The `2 * math.pi * frequency` part
+    // determines the oscillation speed, and the `time` scales it.
+    final double value = math.sin(2 * math.pi * frequency * time);
+    return value;
+  });
+
+  return [samples]; // Return as a single-channel List
+}
+
+var pcmmm = <List<double>>[];
 void main() async {
   await initDependencies();
+  pcmmm = generatePcmData(durationInSeconds: 20);
   runApp(const EchoApp());
   // runApp(const MyApp());
 }

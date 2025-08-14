@@ -6,7 +6,7 @@ class AudioRecorderStatusModel extends AudioRecorderStatus {
     required super.recordDuration,
   });
 
-  factory AudioRecorderStatusModel.fromMap(Map<String, dynamic> data) {
+  factory AudioRecorderStatusModel.fromMap(Map<dynamic, dynamic> data) {
     return AudioRecorderStatusModel(
       isRecording: data['isRecording'],
       recordDuration: Duration(

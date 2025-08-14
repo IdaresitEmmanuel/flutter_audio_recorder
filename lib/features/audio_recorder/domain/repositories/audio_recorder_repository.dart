@@ -4,6 +4,7 @@ import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_reco
 import 'package:dartz/dartz.dart';
 
 abstract class AudioRecorderRepository {
+  Future<DataState<Unit>> requestPermission();
   Future<DataState<Unit>> startRecording();
   Future<DataState<Unit>> pause();
   Future<DataState<Unit>> resume();

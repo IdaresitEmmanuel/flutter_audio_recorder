@@ -10,5 +10,5 @@ class AudioRecorderStatus extends Equatable {
   });
 
   @override
-  List<Object?> get props => [isRecording, recordDuration];
+  List<Object?> get props => [isRecording, recordDuration.toString()];
 }

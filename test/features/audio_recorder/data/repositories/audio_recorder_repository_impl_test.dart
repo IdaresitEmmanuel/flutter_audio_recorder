@@ -14,6 +14,39 @@ void main() {
   final audioRecorderRepositoryImpl = AudioRecorderRepositoryImpl(
     mockAudioRecorderService,
   );
+  group('requestPermission', () {
+    test('should return DataSuccess when result is true', () async {
+      when(
+        () => mockAudioRecorderService.requestPermission(),
+      ).thenAnswer((_) async => true);
+
+      final result = await audioRecorderRepositoryImpl.requestPermission();
+
+      expect(result, isA<DataSuccess>());
+      verify(() => mockAudioRecorderService.requestPermission());
+    });
+    test('should return DataFailure when result is false', () async {
+      when(
+        () => mockAudioRecorderService.requestPermission(),
+      ).thenAnswer((_) async => false);
+
+      final result = await audioRecorderRepositoryImpl.requestPermission();
+
+      expect(result, isA<DataFailure>());
+      verify(() => mockAudioRecorderService.requestPermission());
+    });
+    test('should return DataFailure on Exception', () async {
+      when(
+        () => mockAudioRecorderService.requestPermission(),
+      ).thenThrow(PlatformException(code: 'Not Implemented'));
+
+      final result = await audioRecorderRepositoryImpl.requestPermission();
+
+      expect(result, isA<DataFailure>());
+      verify(() => mockAudioRecorderService.requestPermission());
+    });
+  });
+  
   group('startRecording', () {
     test('should return DataSuccess when result is true', () async {
       when(

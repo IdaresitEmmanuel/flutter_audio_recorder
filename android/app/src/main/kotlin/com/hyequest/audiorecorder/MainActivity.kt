@@ -22,7 +22,7 @@ class MainActivity : FlutterFragmentActivity() {
 
         val methodChannel =
             MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.hyequest.audiorecorder.methodchannel")
-        methodChannel.setMethodCallHandler(HyeFlutterMethodHandler(audioRecorder))
+        methodChannel.setMethodCallHandler(HyeFlutterMethodHandler(audioRecorder,permissionManager))
 
         val recordWaveformChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, "com.hyequest.audiorecorder.recorder_waveform_eventchannel")
         recordWaveformChannel.setStreamHandler(recorderWaveformEventStreamHandler)

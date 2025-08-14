@@ -5,6 +5,7 @@ import 'package:audiorecorder/features/audio_recorder/domain/repositories/audio_
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_recorder_status_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/pause_recorder.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/usecases/request_record_permission.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/resume_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
@@ -29,7 +30,7 @@ Future<void> initDependencies() async {
   // License
   _registerLicenses();
 
-  _registerServices();
+  await _registerServices();
   // Data Sources
   _registerAPIs();
   // Repositories
@@ -55,11 +56,10 @@ _registerLicenses() {
   });
 }
 
-_registerServices() async {
+Future<void> _registerServices() async {
   // Shared Preferences
-  sl.registerSingleton<SharedPreferences>(
-    await SharedPreferences.getInstance(),
-  );
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(sharedPreferences);
   // Method Channels
   sl.registerSingleton<MethodChannel>(PlatformChannels.methodChannel);
   // Event Channels
@@ -107,6 +107,9 @@ _registerUsecases() {
     );
   // Audio Recorder
   sl
+    ..registerSingleton<RequestRecordPermissionUsecase>(
+      RequestRecordPermissionUsecase(sl()),
+    )
     ..registerSingleton<StartRecordingUsecase>(StartRecordingUsecase(sl()))
     ..registerSingleton<PauseRecorderUsecase>(PauseRecorderUsecase(sl()))
     ..registerSingleton<ResumeRecorderUsecase>(ResumeRecorderUsecase(sl()))
@@ -122,6 +125,6 @@ _registerBlocs() {
   sl.registerFactory<OnboardingBloc>(() => OnboardingBloc(sl(), sl()));
   // Audio Recorder
   sl.registerFactory<AudioRecorderBloc>(
-    () => AudioRecorderBloc(sl(), sl(), sl(), sl(), sl(), sl()),
+    () => AudioRecorderBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl()),
   );
 }

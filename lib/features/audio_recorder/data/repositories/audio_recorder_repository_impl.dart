@@ -8,8 +8,23 @@ import 'package:audiorecorder/features/audio_recorder/domain/repositories/audio_
 import 'package:dartz/dartz.dart';
 
 class AudioRecorderRepositoryImpl implements AudioRecorderRepository {
-  final AudioRecorderService _audioRecorderService;
+  final IAudioRecorderService _audioRecorderService;
   AudioRecorderRepositoryImpl(this._audioRecorderService);
+
+  @override
+  Future<DataState<Unit>> requestPermission() async {
+    try {
+      final result = await _audioRecorderService.requestPermission();
+      if (result != null && result) {
+        return DataSuccess(unit);
+      }
+      return DataFailure(DataError(value: 'Unable to setup recorder'));
+    } catch (e) {
+      EchoLogger.e(e);
+      return DataFailure(DataError(value: e));
+    }
+  }
+
   @override
   Future<DataState<Unit>> startRecording() async {
     try {

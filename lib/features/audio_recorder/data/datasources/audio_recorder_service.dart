@@ -1,13 +1,14 @@
 import 'package:flutter/services.dart';
 
 abstract class IAudioRecorderService {
+  Future<bool?> requestPermission();
   Future<bool?> startRecording();
   Future<bool?> pause();
   Future<bool?> resume();
   Future<bool?> stop();
 
-  Stream<Map<String, dynamic>?> pcmStream();
-  Stream<Map<String, dynamic>?> statusStream();
+  Stream<Map<dynamic, dynamic>?> pcmStream();
+  Stream<Map<dynamic, dynamic>?> statusStream();
 }
 
 class AudioRecorderService extends IAudioRecorderService {
@@ -20,6 +21,11 @@ class AudioRecorderService extends IAudioRecorderService {
     this._audioRecorderPcmEventChannel,
     this._audioRecorderStateEventChannel,
   );
+
+  @override
+  Future<bool?> requestPermission() {
+    return _methodChannel.invokeMethod("requestMicrophonePermission");
+  }
 
   @override
   Future<bool?> startRecording() {
@@ -42,14 +48,18 @@ class AudioRecorderService extends IAudioRecorderService {
   }
 
   @override
-  Stream<Map<String, dynamic>?> pcmStream() {
-    return _audioRecorderPcmEventChannel.receiveBroadcastStream()
-        as Stream<Map<String, dynamic>?>;
+  Stream<Map<dynamic, dynamic>?> pcmStream() {
+    return _audioRecorderPcmEventChannel
+        .receiveBroadcastStream()
+        .map<Map<dynamic, dynamic>?>((s) => s);
   }
 
   @override
-  Stream<Map<String, dynamic>?> statusStream() {
-    return _audioRecorderStateEventChannel.receiveBroadcastStream()
-        as Stream<Map<String, dynamic>?>;
+  Stream<Map<dynamic, dynamic>?> statusStream() {
+    return _audioRecorderStateEventChannel
+        .receiveBroadcastStream()
+        .map<Map<dynamic, dynamic>?>((s) => s);
   }
+
+  
 }

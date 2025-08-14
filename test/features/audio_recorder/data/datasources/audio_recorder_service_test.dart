@@ -20,6 +20,17 @@ void main() {
     mockAudioRecorderStateChannel,
   );
 
+  test('should invoke requestPermission', () async {
+    when(
+      () => mockMethodChannel.invokeMethod<bool>("requestMicrophonePermission"),
+    ).thenAnswer((_) async => true);
+
+    final result = await audioRecorderService.requestPermission();
+
+    expect(result, true);
+    verify(() => mockMethodChannel.invokeMethod<bool>("requestMicrophonePermission"));
+  });
+
   test('should invoke startRecorder', () async {
     when(
       () => mockMethodChannel.invokeMethod<bool>("startRecorder"),

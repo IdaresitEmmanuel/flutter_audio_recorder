@@ -5,6 +5,7 @@ import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_reco
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_recorder_status_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/pause_recorder.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/usecases/request_record_permission.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/resume_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
@@ -17,6 +18,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Mocks
+class MockRequestRecordPermissionUsecase extends Mock
+    implements RequestRecordPermissionUsecase {}
+
 class MockStartRecordingUsecase extends Mock implements StartRecordingUsecase {}
 
 class MockPauseRecorderUsecase extends Mock implements PauseRecorderUsecase {}
@@ -31,6 +35,8 @@ class MockGetRecorderStatusStreamUsecase extends Mock
     implements GetRecorderStatusStreamUsecase {}
 
 void main() {
+  final mockRequestRecordPermissionUsecase =
+      MockRequestRecordPermissionUsecase();
   final mockStartRecordingUsecase = MockStartRecordingUsecase();
   final mockPauseRecorderUsecase = MockPauseRecorderUsecase();
   final mockResumeRecorderUsecase = MockResumeRecorderUsecase();
@@ -38,20 +44,46 @@ void main() {
   final mockGetPcmStreamUsecase = MockGetPcmStreamUsecase();
   final mockGetRecorderStatusStreamUsecase =
       MockGetRecorderStatusStreamUsecase();
+   
 
-  final audioRecorderBloc = AudioRecorderBloc(
-    mockStartRecordingUsecase,
-    mockPauseRecorderUsecase,
-    mockResumeRecorderUsecase,
-    mockStopRecorderUsecase,
-    mockGetPcmStreamUsecase,
-    mockGetRecorderStatusStreamUsecase,
+
+  blocTest(
+    '_onRequestRecordPermission: should call request permission',
+    build: () => AudioRecorderBloc(
+      mockRequestRecordPermissionUsecase,
+      mockStartRecordingUsecase,
+      mockPauseRecorderUsecase,
+      mockResumeRecorderUsecase,
+      mockStopRecorderUsecase,
+      mockGetPcmStreamUsecase,
+      mockGetRecorderStatusStreamUsecase,
+    ),
+    setUp: () {
+      when(
+        () => mockRequestRecordPermissionUsecase(),
+      ).thenAnswer((_) async => DataSuccess(unit));
+    },
+    act: (bloc) => bloc.add(RequestRecordPermission()),
+    verify: (bloc) {
+      verify(() => mockRequestRecordPermissionUsecase());
+    },
   );
 
   blocTest(
     '_onStartAudioRecorder: should call start recorder and emit error state on error',
-    build: () => audioRecorderBloc,
+    build: () => AudioRecorderBloc(
+      mockRequestRecordPermissionUsecase,
+      mockStartRecordingUsecase,
+      mockPauseRecorderUsecase,
+      mockResumeRecorderUsecase,
+      mockStopRecorderUsecase,
+      mockGetPcmStreamUsecase,
+      mockGetRecorderStatusStreamUsecase,
+    ),
     setUp: () {
+      when(
+        () => mockRequestRecordPermissionUsecase(),
+      ).thenAnswer((_) async => DataSuccess(unit));
       when(
         () => mockStartRecordingUsecase(),
       ).thenAnswer((_) async => DataFailure(DataError(value: "error")));
@@ -65,7 +97,15 @@ void main() {
 
   blocTest(
     '_onPauseAudioRecorder: should call pause',
-    build: () => audioRecorderBloc,
+    build: () => AudioRecorderBloc(
+      mockRequestRecordPermissionUsecase,
+      mockStartRecordingUsecase,
+      mockPauseRecorderUsecase,
+      mockResumeRecorderUsecase,
+      mockStopRecorderUsecase,
+      mockGetPcmStreamUsecase,
+      mockGetRecorderStatusStreamUsecase,
+    ),
     setUp: () {
       when(
         () => mockPauseRecorderUsecase(),
@@ -79,7 +119,15 @@ void main() {
 
   blocTest(
     '_onResumeAudioRecorder: should call resume',
-    build: () => audioRecorderBloc,
+    build: () => AudioRecorderBloc(
+      mockRequestRecordPermissionUsecase,
+      mockStartRecordingUsecase,
+      mockPauseRecorderUsecase,
+      mockResumeRecorderUsecase,
+      mockStopRecorderUsecase,
+      mockGetPcmStreamUsecase,
+      mockGetRecorderStatusStreamUsecase,
+    ),
     setUp: () {
       when(
         () => mockResumeRecorderUsecase(),
@@ -93,7 +141,15 @@ void main() {
 
   blocTest(
     '_onStopAudioRecorder: should call stop',
-    build: () => audioRecorderBloc,
+    build: () => AudioRecorderBloc(
+      mockRequestRecordPermissionUsecase,
+      mockStartRecordingUsecase,
+      mockPauseRecorderUsecase,
+      mockResumeRecorderUsecase,
+      mockStopRecorderUsecase,
+      mockGetPcmStreamUsecase,
+      mockGetRecorderStatusStreamUsecase,
+    ),
     setUp: () {
       when(
         () => mockStopRecorderUsecase(),
@@ -110,6 +166,7 @@ void main() {
     blocTest(
       'should call pcm stream and emit active state',
       build: () => AudioRecorderBloc(
+        mockRequestRecordPermissionUsecase,
         mockStartRecordingUsecase,
         mockPauseRecorderUsecase,
         mockResumeRecorderUsecase,
@@ -118,9 +175,7 @@ void main() {
         mockGetRecorderStatusStreamUsecase,
       ),
       setUp: () {
-        when(
-          () => mockGetPcmStreamUsecase(),
-        ).thenAnswer((_) => Stream.value(entity));
+        
       },
       act: (bloc) => bloc.add(GetAudioRecorderPcmStream()),
       verify: (bloc) {
@@ -138,6 +193,7 @@ void main() {
     blocTest(
       'should call status stream and emit active state',
       build: () => AudioRecorderBloc(
+        mockRequestRecordPermissionUsecase,
         mockStartRecordingUsecase,
         mockPauseRecorderUsecase,
         mockResumeRecorderUsecase,

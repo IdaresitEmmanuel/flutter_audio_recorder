@@ -21,7 +21,7 @@ class AudioRecorder :  NSObject{
     var onWaveformData: (([String: Any]) -> Void)?
     var onRecordStatusData: (([String: Any]) -> Void)?
     
-    func requestMicrophonePermission() async -> Bool {
+    private func requestMicrophonePermission() async -> Bool {
         await withCheckedContinuation { continuation in
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 continuation.resume(returning: granted)
@@ -29,20 +29,43 @@ class AudioRecorder :  NSObject{
         }
     }
     
+    /// Returns isMicrophonePermissionGranted
+     func setUp() async throws -> Bool{
+          // 1. Request microphone permission
+          let granted = await requestMicrophonePermission()
+          guard granted else {
+              throw RecorderError.missingMicrophonePermission
+          }
+
+          // 2. Set up and activate the audio session
+          do {
+              try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
+              try AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+          } catch {
+              print("Error setting up audio session: \(error.localizedDescription)")
+              throw error
+          }
+         return granted
+      }
+    
+
+    
     func start() async throws {
+        
         let granted = await requestMicrophonePermission()
         guard granted else {
             throw RecorderError.missingMicrophonePermission
         }
         
-        try? AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker])
-        try? AVAudioSession.sharedInstance().setActive(true, options: .notifyOthersOnDeactivation)
+        guard AVAudioSession.sharedInstance().isInputAvailable else {
+                throw RecorderError.inputNotAvailable
+            }
         
         
         let inputNode = self.audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: self.bus)
         
-        inputNode.removeTap(onBus: 0)
+        inputNode.removeTap(onBus: self.bus)
         inputNode.installTap(onBus: self.bus, bufferSize: 1024, format: format) { [weak self] buffer, _ in
             self?.processAudioBuffer(buffer: buffer)
         }
@@ -100,13 +123,17 @@ class AudioRecorder :  NSObject{
         
         
         let waveformModel = RecordWaveformModel(timestamp: recordDuration, data: normalized)
-        onWaveformData?(waveformModel.toDictionary())
+        DispatchQueue.main.async {
+            self.onWaveformData?(waveformModel.toDictionary())
+        }
         sendRecordStatus()
     }
     
     private func sendRecordStatus(){
         let recordStatusModel = RecordStatusModel(isRecording: audioEngine.isRunning, recordDuration: recordDuration)
-        onRecordStatusData?(recordStatusModel.toDictionary())
+        DispatchQueue.main.async {
+            self.onRecordStatusData?(recordStatusModel.toDictionary())
+        }
     }
 
 }

@@ -23,9 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    
     _checkAndNavigate();
-
   }
 
   @override
@@ -34,7 +32,8 @@ class _SplashScreenState extends State<SplashScreen> {
     super.dispose();
   }
 
-  _checkAndNavigate() {
+  _checkAndNavigate() async {
+    await Future.delayed(Duration(seconds: 2));
     final bloc = sl.get<OnboardingBloc>();
     _streamSubscription?.cancel();
     _streamSubscription = bloc.stream.listen((state) {

@@ -14,7 +14,7 @@ import UIKit
     }
     
     // MARK: FLUTTER METHOD CHANNELS
-    func setUpFlutterMethodChannels(_ controller: FlutterViewController){
+    func setUpFlutterMethodChannels(_ controller: FlutterViewController) {
         // Set Up MethodChannel
         let methodChannel = FlutterMethodChannel(name: "com.hyequest.audiorecorder.methodchannel", binaryMessenger:
                                                     controller.binaryMessenger)
@@ -26,5 +26,9 @@ import UIKit
         // Set up Recorder Status EventChannel
         let recorderStatusEventChannel = FlutterEventChannel(name: "com.hyequest.audiorecorder.recorder_status_eventchannel", binaryMessenger: controller.binaryMessenger)
         recorderStatusEventChannel.setStreamHandler(AudioRecorderStatusStreamHandler())
+        
+//        Task{
+//            try? await AudioRecorder.shared.prepare()
+//        }
     }
 }
