@@ -222,94 +222,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // Second
 
- /// Generates the 44-byte WAV header for the audio file.
-  // Uint8List _buildWavHeader(int audioDataLength) {
-  //   // We assume 1 channel, 16-bit PCM, and a sample rate of 44100 Hz.
-  //   const int sampleRate = 44100;
-  //   const int numChannels = 1;
-  //   const int bitsPerSample = 16;
-  //   final int byteRate = sampleRate * numChannels * bitsPerSample ~/ 8;
-  //   final int blockAlign = numChannels * bitsPerSample ~/ 8;
 
-  //   final int fileSize = 36 + audioDataLength;
-  //   final ByteData header = ByteData(44);
 
-  //   // RIFF chunk descriptor
-  //   header.setUint8(0, 'R'.codeUnitAt(0));
-  //   header.setUint8(1, 'I'.codeUnitAt(0));
-  //   header.setUint8(2, 'F'.codeUnitAt(0));
-  //   header.setUint8(3, 'F'.codeUnitAt(0));
-  //   header.setUint32(4, fileSize, Endian.little);
-  //   header.setUint8(8, 'W'.codeUnitAt(0));
-  //   header.setUint8(9, 'A'.codeUnitAt(0));
-  //   header.setUint8(10, 'V'.codeUnitAt(0));
-  //   header.setUint8(11, 'E'.codeUnitAt(0));
-
-  //   // fmt sub-chunk
-  //   header.setUint8(12, 'f'.codeUnitAt(0));
-  //   header.setUint8(13, 'm'.codeUnitAt(0));
-  //   header.setUint8(14, 't'.codeUnitAt(0));
-  //   header.setUint8(15, ' '.codeUnitAt(0));
-  //   header.setUint32(16, 16, Endian.little); // Sub-chunk 1 size
-  //   header.setUint16(20, 1, Endian.little); // Audio format (1 for PCM)
-  //   header.setUint16(22, numChannels, Endian.little);
-  //   header.setUint32(24, sampleRate, Endian.little);
-  //   header.setUint32(28, byteRate, Endian.little);
-  //   header.setUint16(32, blockAlign, Endian.little);
-  //   header.setUint16(34, bitsPerSample, Endian.little);
-
-  //   // data sub-chunk
-  //   header.setUint8(36, 'd'.codeUnitAt(0));
-  //   header.setUint8(37, 'a'.codeUnitAt(0));
-  //   header.setUint8(38, 't'.codeUnitAt(0));
-  //   header.setUint8(39, 'a'.codeUnitAt(0));
-  //   header.setUint32(40, audioDataLength, Endian.little);
-
-  //   return header.buffer.asUint8List();
-  // }
-
-  /// This function takes a nested list of audio data,
-  /// converts it to a byte array, and writes it to a file.
-  // Future<void> writeAudioToFile(List<List<double>> audioData) async {
-  //   setState(() {
-  //     _statusMessage = 'Writing file...';
-  //   });
-  //   try {
-  //     // 1. Flatten the nested list into a single List of doubles.
-  //     final List<double> flattenedData = audioData.expand((list) => list).toList();
-
-  //     // 2. Convert the double data to a 16-bit signed integer format (Int16).
-  //     final Int16List int16Data = Int16List(flattenedData.length);
-  //     for (int i = 0; i < flattenedData.length; i++) {
-  //       double value = flattenedData[i].clamp(-1.0, 1.0);
-  //       int16Data[i] = (value * 32767).toInt();
-  //     }
-
-  //     // 3. Convert the Int16List to a Uint8List (byte array) for writing.
-  //     final Uint8List audioBytes = int16Data.buffer.asUint8List();
-      
-  //     // 4. Build the WAV header.
-  //     final Uint8List headerBytes = _buildWavHeader(audioBytes.length);
-
-  //     // 5. Combine the header and audio data into a single list of bytes.
-  //     final Uint8List fullFileBytes = Uint8List.fromList(headerBytes + audioBytes);
-
-  //     // 6. Get a temporary directory to store the file and write the data.
-  //     final Directory tempDir = await getTemporaryDirectory();
-  //     final String filePath = '${tempDir.path}/$_fileName';
-  //     final File file = File(filePath);
-
-  //     await file.writeAsBytes(fullFileBytes);
-
-  //     setState(() {
-  //       _statusMessage = 'Successfully wrote file to: $filePath';
-  //     });
-  //   } catch (e) {
-  //     setState(() {
-  //       _statusMessage = 'Error writing file: $e';
-  //     });
-  //   }
-  // }
+  
 // Read and convert the file
 
   // Future<void> readAudioFromFile() async {

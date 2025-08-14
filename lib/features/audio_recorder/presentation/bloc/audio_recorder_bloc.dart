@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_status.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_save.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_recorder_status_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/pause_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/request_record_permission.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/resume_recorder.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/usecases/save_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_event.dart';
@@ -22,6 +24,8 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
   final StopRecorderUsecase _stopRecorderUsecase;
   final GetPcmStreamUsecase _pcmStreamUsecase;
   final GetRecorderStatusStreamUsecase _recorderStatusStreamUsecase;
+  //
+  final SaveRecordingUsecase _saveRecordingUsecase;
   AudioRecorderBloc(
     this._recordPermissionUsecase,
     this._startRecordingUsecase,
@@ -30,6 +34,7 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     this._stopRecorderUsecase,
     this._pcmStreamUsecase,
     this._recorderStatusStreamUsecase,
+    this._saveRecordingUsecase,
   ) : super(AudioRecorderStateActive.initial()) {
     on<RequestRecordPermission>(_onRequestRecordPermission);
     on<StartAudioRecorder>(_onStartAudioRecorder);
@@ -38,6 +43,9 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     on<StopAudioRecorder>(_onStopAudioRecorder);
     on<GetAudioRecorderPcmStream>(_onGetAudioRecorderPcmStream);
     on<GetAudioRecorderStatusStream>(_onGetAudioRecorderStatusStream);
+    on<SaveAudioRecording>(_onSaveAudioRecording);
+    on<DiscardAudioRecording>(_onDiscardAudioRecording);
+    on<RestartAudioRecording>(_onRestartAudioRecording);
   }
 
   init() async {
@@ -141,6 +149,51 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
           ? (state as AudioRecorderStateActive).copyWith(recorderStatus: status)
           : AudioRecorderStateActive(recorderStatus: status, pcm: []);
       emit(newState);
+    }
+  }
+
+  Future<void> _onSaveAudioRecording(
+    SaveAudioRecording event,
+    Emitter<AudioRecorderState> emit,
+  ) async {
+    if (state is AudioRecorderStateActive) {
+      final activeState = state as AudioRecorderStateActive;
+      final title = event.title ?? "Record ${DateTime.now().toIso8601String()}";
+      final audioSave = AudioSave(data: activeState.pcm, title: title);
+      final result = await _saveRecordingUsecase(params: audioSave);
+      if (result is DataFailure) {
+        EchoLogger.e(result.error.toString());
+      } else {
+        EchoLogger.i("Recording Saved");
+      }
+    }
+  }
+
+  Future<void> _onDiscardAudioRecording(
+    DiscardAudioRecording event,
+    Emitter<AudioRecorderState> emit,
+  ) async {
+    if (state is AudioRecorderStateActive) {
+      emit(AudioRecorderStateActive.initial());
+    }
+  }
+
+  Future<void> _onRestartAudioRecording(
+    RestartAudioRecording event,
+    Emitter<AudioRecorderState> emit,
+  ) async {
+    final stopResult = await _stopRecorderUsecase();
+    if (stopResult is DataFailure) {
+      EchoLogger.e(stopResult.error.toString());
+      return;
+    } else {
+      EchoLogger.i("Recording Saved");
+    }
+    final startResult = await _startRecordingUsecase();
+    if (startResult is DataFailure) {
+      EchoLogger.e(startResult.error.toString());
+    } else {
+      EchoLogger.i("Recording Saved");
     }
   }
 }

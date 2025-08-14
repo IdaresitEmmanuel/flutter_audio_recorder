@@ -1,6 +1,6 @@
 import 'package:audiorecorder/core/platform_channels/platform_channels.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/audio_tag_helper.dart';
-import 'package:audiorecorder/features/audio_playback/data/datasources/path_finder.dart';
+import 'package:audiorecorder/core/util/path_finder.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/permission_manager.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/platform_checker.dart';
 import 'package:audiorecorder/features/audio_playback/data/repositories/audio_library_repository_impl.dart';
@@ -10,13 +10,17 @@ import 'package:audiorecorder/features/audio_playback/domain/usecases/get_audio_
 import 'package:audiorecorder/features/audio_playback/domain/usecases/request_storage_permission.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/audio_recorder_service.dart';
+import 'package:audiorecorder/features/audio_recorder/data/datasources/wave_codec_helper.dart';
 import 'package:audiorecorder/features/audio_recorder/data/repositories/audio_recorder_repository_impl.dart';
+import 'package:audiorecorder/features/audio_recorder/data/repositories/audio_storage_repository_impl.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/repositories/audio_recorder_repository.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/repositories/audio_storage_repository.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_recorder_status_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/pause_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/request_record_permission.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/resume_recorder.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/usecases/save_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_bloc.dart';
@@ -85,6 +89,8 @@ Future<void> _registerServices() async {
       PlatformChannels.audioRecorderStateEventChannel,
       instanceName: 'audioRecorderStateEventChannel',
     );
+  // audio recorder
+  sl.registerSingleton<WaveCodecHelper>(WaveCodecHelper());
   // audio playback
   sl
     ..registerSingleton<AudioTagHelper>(AudioTagHelper())
@@ -110,9 +116,13 @@ _registerRepositories() {
   // Onboarding
   sl.registerSingleton<OnboardingRepository>(OnboardingRepositoryImpl(sl()));
   // Audio Recorder
-  sl.registerSingleton<AudioRecorderRepository>(
-    AudioRecorderRepositoryImpl(sl()),
-  );
+  sl
+    ..registerSingleton<AudioRecorderRepository>(
+      AudioRecorderRepositoryImpl(sl()),
+    )
+    ..registerSingleton<AudioStorageRepository>(
+      AudioStorageRepositoryImpl(sl(), sl()),
+    );
   // Audio Playback
   sl.registerSingleton<AudioLibraryRepository>(
     AudioLibraryRepositoryImpl(sl(), sl(), sl(), sl(), sl()),
@@ -140,7 +150,8 @@ _registerUsecases() {
     ..registerSingleton<GetPcmStreamUsecase>(GetPcmStreamUsecase(sl()))
     ..registerSingleton<GetRecorderStatusStreamUsecase>(
       GetRecorderStatusStreamUsecase(sl()),
-    );
+    )
+    ..registerSingleton<SaveRecordingUsecase>(SaveRecordingUsecase(sl()));
   // Audio Playback
   sl
     ..registerSingleton<RequestStoragePermissionUsecase>(
@@ -155,7 +166,7 @@ _registerBlocs() {
   sl.registerFactory<OnboardingBloc>(() => OnboardingBloc(sl(), sl()));
   // Audio Recorder
   sl.registerFactory<AudioRecorderBloc>(
-    () => AudioRecorderBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl()),
+    () => AudioRecorderBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()),
   );
   // Audio Playback
   sl.registerFactory<AudioPlaybackBloc>(

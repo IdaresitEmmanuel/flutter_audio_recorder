@@ -2,11 +2,13 @@ import 'package:audiorecorder/core/resources/data_error.dart';
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_pcm.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_status.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_save.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_recorder_status_stream.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/pause_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/request_record_permission.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/resume_recorder.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/usecases/save_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/start_recording.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/stop_recorder.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_bloc.dart';
@@ -34,6 +36,8 @@ class MockGetPcmStreamUsecase extends Mock implements GetPcmStreamUsecase {}
 class MockGetRecorderStatusStreamUsecase extends Mock
     implements GetRecorderStatusStreamUsecase {}
 
+class MockSaveRecordingUsecase extends Mock implements SaveRecordingUsecase {}
+
 void main() {
   final mockRequestRecordPermissionUsecase =
       MockRequestRecordPermissionUsecase();
@@ -44,8 +48,7 @@ void main() {
   final mockGetPcmStreamUsecase = MockGetPcmStreamUsecase();
   final mockGetRecorderStatusStreamUsecase =
       MockGetRecorderStatusStreamUsecase();
-   
-
+  final mockSaveRecordingUsecase = MockSaveRecordingUsecase();
 
   blocTest(
     '_onRequestRecordPermission: should call request permission',
@@ -57,6 +60,7 @@ void main() {
       mockStopRecorderUsecase,
       mockGetPcmStreamUsecase,
       mockGetRecorderStatusStreamUsecase,
+      mockSaveRecordingUsecase,
     ),
     setUp: () {
       when(
@@ -79,6 +83,7 @@ void main() {
       mockStopRecorderUsecase,
       mockGetPcmStreamUsecase,
       mockGetRecorderStatusStreamUsecase,
+      mockSaveRecordingUsecase,
     ),
     setUp: () {
       when(
@@ -105,6 +110,7 @@ void main() {
       mockStopRecorderUsecase,
       mockGetPcmStreamUsecase,
       mockGetRecorderStatusStreamUsecase,
+      mockSaveRecordingUsecase,
     ),
     setUp: () {
       when(
@@ -127,6 +133,7 @@ void main() {
       mockStopRecorderUsecase,
       mockGetPcmStreamUsecase,
       mockGetRecorderStatusStreamUsecase,
+      mockSaveRecordingUsecase,
     ),
     setUp: () {
       when(
@@ -149,6 +156,7 @@ void main() {
       mockStopRecorderUsecase,
       mockGetPcmStreamUsecase,
       mockGetRecorderStatusStreamUsecase,
+      mockSaveRecordingUsecase,
     ),
     setUp: () {
       when(
@@ -173,6 +181,7 @@ void main() {
         mockStopRecorderUsecase,
         mockGetPcmStreamUsecase,
         mockGetRecorderStatusStreamUsecase,
+        mockSaveRecordingUsecase,
       ),
       setUp: () {
         when(
@@ -202,6 +211,7 @@ void main() {
         mockStopRecorderUsecase,
         mockGetPcmStreamUsecase,
         mockGetRecorderStatusStreamUsecase,
+        mockSaveRecordingUsecase,
       ),
       setUp: () {
         when(
@@ -213,6 +223,103 @@ void main() {
         verify(() => mockGetRecorderStatusStreamUsecase());
       },
       expect: () => [isA<AudioRecorderStateActive>()],
+    );
+  });
+
+  group('_onSaveAudioRecording', () {
+    final title = "Record 01";
+    final audioSave = AudioSave(data: [], title: title);
+    blocTest(
+      'should call saveRecording',
+      build: () => AudioRecorderBloc(
+        mockRequestRecordPermissionUsecase,
+        mockStartRecordingUsecase,
+        mockPauseRecorderUsecase,
+        mockResumeRecorderUsecase,
+        mockStopRecorderUsecase,
+        mockGetPcmStreamUsecase,
+        mockGetRecorderStatusStreamUsecase,
+        mockSaveRecordingUsecase,
+      ),
+      setUp: () {
+        when(
+          () => mockSaveRecordingUsecase(params: audioSave),
+        ).thenAnswer((_) async => DataSuccess(unit));
+      },
+      seed: () => AudioRecorderStateActive.initial().copyWith(pcm: []),
+      act: (bloc) => bloc.add(SaveAudioRecording(title: title)),
+      verify: (bloc) =>
+          verify(() => mockSaveRecordingUsecase(params: audioSave)),
+    );
+  });
+
+  blocTest(
+    'should discard and emit active initial state',
+    build: () => AudioRecorderBloc(
+      mockRequestRecordPermissionUsecase,
+      mockStartRecordingUsecase,
+      mockPauseRecorderUsecase,
+      mockResumeRecorderUsecase,
+      mockStopRecorderUsecase,
+      mockGetPcmStreamUsecase,
+      mockGetRecorderStatusStreamUsecase,
+      mockSaveRecordingUsecase,
+    ),
+
+    act: (bloc) => bloc.add(DiscardAudioRecording()),
+    expect: () => [AudioRecorderStateActive.initial()],
+  );
+
+  group('_onRestartAudioRecording', () {
+    blocTest(
+      'should return function when stopRecorder return error',
+      build: () => AudioRecorderBloc(
+        mockRequestRecordPermissionUsecase,
+        mockStartRecordingUsecase,
+        mockPauseRecorderUsecase,
+        mockResumeRecorderUsecase,
+        mockStopRecorderUsecase,
+        mockGetPcmStreamUsecase,
+        mockGetRecorderStatusStreamUsecase,
+        mockSaveRecordingUsecase,
+      ),
+      setUp: () {
+        when(
+          () => mockStopRecorderUsecase(),
+        ).thenAnswer((_) async => DataFailure(DataError(value: 'error')));
+      },
+      act: (bloc) => bloc.add(RestartAudioRecording()),
+      verify: (bloc) {
+        verify(() => mockStopRecorderUsecase());
+        verifyNever(() => mockStartRecordingUsecase());
+      },
+    );
+    blocTest(
+      'should call stopRecorder and startRecorder',
+      build: () => AudioRecorderBloc(
+        mockRequestRecordPermissionUsecase,
+        mockStartRecordingUsecase,
+        mockPauseRecorderUsecase,
+        mockResumeRecorderUsecase,
+        mockStopRecorderUsecase,
+        mockGetPcmStreamUsecase,
+        mockGetRecorderStatusStreamUsecase,
+        mockSaveRecordingUsecase,
+      ),
+      setUp: () {
+        when(
+          () => mockStopRecorderUsecase(),
+        ).thenAnswer((_) async => DataSuccess(unit));
+
+        when(
+          () => mockStartRecordingUsecase(),
+        ).thenAnswer((_) async => DataSuccess(unit));
+      },
+      act: (bloc) => bloc.add(RestartAudioRecording()),
+      verify: (bloc) {
+        verify(() => mockStopRecorderUsecase());
+        verify(() => mockStartRecordingUsecase());
+      },
     );
   });
 }
