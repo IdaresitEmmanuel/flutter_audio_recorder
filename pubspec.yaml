@@ -42,6 +42,7 @@ dependencies:
   audio_metadata_reader: ^1.4.2
   avatar_glow: ^3.0.1
   intl: ^0.20.2
+  audioplayers: ^6.5.0
   # audiotags: ^1.4.5
 
 dev_dependencies:

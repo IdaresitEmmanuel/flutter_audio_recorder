@@ -9,7 +9,7 @@ import 'package:audiorecorder/features/audio_playback/data/datasources/audio_tag
 import 'package:audiorecorder/core/util/path_finder.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/permission_manager.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/platform_checker.dart';
-import 'package:audiorecorder/features/audio_playback/data/models/audio_record_model.dart';
+import 'package:audiorecorder/features/audio_playback/data/models/audio_file_model.dart';
 import 'package:audiorecorder/features/audio_playback/domain/entity/audio_file.dart';
 import 'package:audiorecorder/features/audio_playback/domain/repositories/audio_library_repository.dart';
 import 'package:dartz/dartz.dart';

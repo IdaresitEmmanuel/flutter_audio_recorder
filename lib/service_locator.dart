@@ -1,14 +1,23 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:audiorecorder/core/platform_channels/platform_channels.dart';
+import 'package:audiorecorder/features/audio_playback/data/datasources/audio_player_service.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/audio_tag_helper.dart';
 import 'package:audiorecorder/core/util/path_finder.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/permission_manager.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/platform_checker.dart';
 import 'package:audiorecorder/features/audio_playback/data/repositories/audio_library_repository_impl.dart';
+import 'package:audiorecorder/features/audio_playback/data/repositories/audio_playback_repository_impl.dart';
 import 'package:audiorecorder/features/audio_playback/domain/repositories/audio_library_repository.dart';
+import 'package:audiorecorder/features/audio_playback/domain/repositories/audio_playback_repository.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/delete_audio_file.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/get_audio_files.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/get_audio_playback_status_stream.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/pause_audio_player.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/play_audio_file.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/request_storage_permission.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/seek_to_position.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_event.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/audio_recorder_service.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/wave_codec_helper.dart';
 import 'package:audiorecorder/features/audio_recorder/data/repositories/audio_recorder_repository_impl.dart';
@@ -96,7 +105,8 @@ Future<void> _registerServices() async {
     ..registerSingleton<AudioTagHelper>(AudioTagHelper())
     ..registerSingleton<PathFinder>(PathFinder())
     ..registerSingleton<PermissionManager>(PermissionManager.instance)
-    ..registerSingleton<PlatformChecker>(PlatformChecker());
+    ..registerSingleton<PlatformChecker>(PlatformChecker())
+    ..registerSingleton<AudioPlayer>(AudioPlayer());
 }
 
 _registerAPIs() {
@@ -110,6 +120,8 @@ _registerAPIs() {
       sl(instanceName: 'audioRecorderStateEventChannel'),
     ),
   );
+  // Audio Playback
+  sl.registerSingleton<IAudioPlayerService>(AudioPlayerService(sl()));
 }
 
 _registerRepositories() {
@@ -124,9 +136,13 @@ _registerRepositories() {
       AudioStorageRepositoryImpl(sl(), sl()),
     );
   // Audio Playback
-  sl.registerSingleton<AudioLibraryRepository>(
-    AudioLibraryRepositoryImpl(sl(), sl(), sl(), sl(), sl()),
-  );
+  sl
+    ..registerSingleton<AudioLibraryRepository>(
+      AudioLibraryRepositoryImpl(sl(), sl(), sl(), sl(), sl()),
+    )
+    ..registerSingleton<AudioPlaybackRepository>(
+      AudioPlaybackRepositoryImpl(sl()),
+    );
 }
 
 _registerUsecases() {
@@ -158,7 +174,14 @@ _registerUsecases() {
       RequestStoragePermissionUsecase(sl()),
     )
     ..registerSingleton<GetAudioFilesUsecase>(GetAudioFilesUsecase(sl()))
-    ..registerSingleton<DeleteAudioFileUsecase>(DeleteAudioFileUsecase(sl()));
+    ..registerSingleton<DeleteAudioFileUsecase>(DeleteAudioFileUsecase(sl()))
+    ..registerSingleton<PlayAudioFileUsecase>(PlayAudioFileUsecase(sl()))
+    ..registerSingleton<PauseAudioPlayerUsecase>(PauseAudioPlayerUsecase(sl()))
+    ..registerSingleton<SeekToPositionUsecase>(SeekToPositionUsecase(sl()))
+    ..registerSingleton<StopAudioPlayer>(StopAudioPlayer())
+    ..registerSingleton<GetAudioPlaybackStatusStreamUsecase>(
+      GetAudioPlaybackStatusStreamUsecase(sl()),
+    );
 }
 
 _registerBlocs() {
@@ -170,6 +193,6 @@ _registerBlocs() {
   );
   // Audio Playback
   sl.registerFactory<AudioPlaybackBloc>(
-    () => AudioPlaybackBloc(sl(), sl(), sl()),
+    () => AudioPlaybackBloc(sl(), sl(), sl(), sl(), sl(), sl(), sl(), sl()),
   );
 }

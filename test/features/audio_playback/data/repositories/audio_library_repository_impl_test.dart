@@ -6,7 +6,7 @@ import 'package:audiorecorder/features/audio_playback/data/datasources/audio_tag
 import 'package:audiorecorder/core/util/path_finder.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/permission_manager.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/platform_checker.dart';
-import 'package:audiorecorder/features/audio_playback/data/models/audio_record_model.dart';
+import 'package:audiorecorder/features/audio_playback/data/models/audio_file_model.dart';
 import 'package:audiorecorder/features/audio_playback/data/repositories/audio_library_repository_impl.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
