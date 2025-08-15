@@ -54,6 +54,9 @@ void main() {
       when(() => mockPathFinder.file(any())).thenReturn(mockFile);
 
       when(
+        () => mockFile.create(recursive: true),
+      ).thenAnswer((_) async => File(''));
+      when(
         () => mockFile.writeAsBytes(any()),
       ).thenAnswer((_) async => File(''));
 

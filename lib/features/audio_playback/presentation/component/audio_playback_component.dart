@@ -2,9 +2,11 @@ import 'package:audiorecorder/core/presentation/assets/app_assets.dart';
 import 'package:audiorecorder/core/presentation/router/app_router.dart';
 import 'package:audiorecorder/core/presentation/theme/colors.dart';
 import 'package:audiorecorder/core/presentation/widgets/app_icon.dart';
+import 'package:audiorecorder/core/presentation/widgets/app_popup_menu.dart';
 import 'package:audiorecorder/core/presentation/widgets/echo_scaffold.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_event.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_state.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/widgets/audio_list_item.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/widgets/persistent_divider.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/widgets/playback_sliver_appbar.dart';
@@ -27,12 +29,12 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
   final ScrollController _scrollController = ScrollController();
   bool _isAppBarCollapsed = false;
   double expandedHeight = 300.0;
-
+  double fabSize = 82.0;
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    bloc?.add(RequestStoragePermission());
+    bloc?.add(GetAudioFiles());
   }
 
   @override
@@ -45,7 +47,7 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
     double collapseOffset = expandedHeight - kToolbarHeight;
     final bool collapsed =
         _scrollController.hasClients &&
-        _scrollController.offset >= collapseOffset;
+        _scrollController.offset >= collapseOffset / 1.5; // prev remove 1.5
 
     if (_isAppBarCollapsed != collapsed) {
       setState(() {
@@ -54,8 +56,14 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
     }
   }
 
-  _startRecording() {
-    AppRouter.goToAudioRecorderScreen(context, argument: true);
+  _startRecording() async {
+    await AppRouter.goToAudioRecorderScreen(context, argument: true);
+    bloc?.add(GetAudioFiles());
+    await Future.delayed(Duration(seconds: 1), () {
+      if (context.mounted) {
+        bloc?.add(GetAudioFiles());
+      }
+    });
   }
 
   @override
@@ -65,8 +73,8 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
       floatingActionButton: !_isAppBarCollapsed
           ? null
           : SizedBox(
-              height: 82.0,
-              width: 82.0,
+              height: fabSize,
+              width: fabSize,
               child: FittedBox(
                 child: FloatingActionButton(
                   onPressed: _startRecording,
@@ -93,15 +101,62 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
           ),
           SliverPersistentHeader(delegate: PersistentDivider(height: 3)),
           SliverToBoxAdapter(child: SizedBox(height: 40)),
-          SliverList.separated(
-            itemCount: 20,
-            separatorBuilder: (context, index) {
-              return SizedBox(height: 12);
-            },
-            itemBuilder: (context, index) {
-              return AudioListItem();
-            },
-          ),
+          if (bloc != null)
+            BlocBuilder<AudioPlaybackBloc, AudioPlaybackState>(
+              builder: (context, state) {
+                if (state is AudioPlaybackLoading) {
+                  return SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 200,
+
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  );
+                }
+
+                final stateDone = state as AudioPlaybackDone;
+
+                if (stateDone.fileList.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 200,
+                      child: Center(child: Text("No Files")),
+                    ),
+                  );
+                }
+
+                return SliverList.separated(
+                  itemCount: stateDone.fileList.length,
+                  separatorBuilder: (context, index) {
+                    return SizedBox(height: 12);
+                  },
+                  itemBuilder: (context, index) {
+                    final audioFile = stateDone.fileList[index];
+                    return AudioListItem(
+                      audioFile: audioFile,
+                      onLongPress: (details) {
+                        AppPopupMenu.show<String>(
+                          context: context,
+                          tapPosition: details.globalPosition,
+                          onMenuItemSelected: (item) {
+                            if (item == "delete") {
+                              bloc?.add(DeleteAudioFile(audioFile: audioFile));
+                            }
+                          },
+                          menuItems: [
+                            ShieldedPopupMenuItem<String>(
+                              title: "Delete",
+                              value: "delete",
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          SliverToBoxAdapter(child: SizedBox(height: fabSize)),
         ],
       ),
     );

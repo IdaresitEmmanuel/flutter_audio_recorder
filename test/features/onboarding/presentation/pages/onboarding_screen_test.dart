@@ -18,13 +18,14 @@ void main() {
     sl.registerFactory<OnboardingBloc>(() => mockOnboardingBloc);
   });
 
-  testWidgets('should save first lauch and navigate to recorder screen', (
+  testWidgets('should save first lauch and navigate to playback screen', (
     tester,
   ) async {
     // stub
     when(() => mockOnboardingBloc.add(SetOnboardingStatus())).thenReturn(null);
 
     // find widgets
+    final onboardingScaffold = find.byKey(ValueKey('onboarding'));
     final getStartedButton = find.byKey(ValueKey('getstarted'));
 
     // execute tests
@@ -34,15 +35,19 @@ void main() {
         onGenerateRoute: Routes.onGenerateRoute,
       ),
     );
+
+    expect(onboardingScaffold, findsOneWidget);
+    expect(getStartedButton, findsOneWidget);
+
     await tester.tap(getStartedButton);
+
+    // trigger navigation
+    await tester.pump(Duration(milliseconds: 100));
+    // verify navigation to recorder screen
+    expect(find.byKey(ValueKey('audioPlayback')), findsOneWidget);
 
     // verify
     verify(() => mockOnboardingBloc.add(SetOnboardingStatus())).called(1);
     verifyNoMoreInteractions(mockOnboardingBloc);
-
-    // trigger navigation
-    await tester.pumpAndSettle();
-    // verify navigation to recorder screen
-    expect(find.byKey(ValueKey('audioPlayback')), findsOneWidget);
   });
 }

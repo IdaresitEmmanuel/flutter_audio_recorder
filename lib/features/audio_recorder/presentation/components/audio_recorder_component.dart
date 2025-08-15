@@ -1,8 +1,11 @@
 import 'package:audiorecorder/core/presentation/assets/app_assets.dart';
+import 'package:audiorecorder/core/presentation/router/app_router.dart';
 import 'package:audiorecorder/core/presentation/widgets/echo_scaffold.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_bloc.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_event.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_state.dart';
+import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/save_or_discard_dialog.dart';
+import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/save_recording_dialog.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/media_button_label.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/pcm_display.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/record_button.dart';
@@ -37,6 +40,7 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
   Widget build(BuildContext context) {
     return EchoScaffold(
       key: Key('audioRecorder'),
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text("Recording"),
         centerTitle: true,
@@ -59,79 +63,112 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
 
   Widget _buildBody(AudioRecorderStateActive state) {
     final recorderStatus = state.recorderStatus;
-    return SizedBox(
-      // height: 500,
-      child: Column(
-        children: [
-          Spacer(),
-          Expanded(
-            flex: 2,
-            child: Container(
-              width: double.maxFinite,
-              constraints: BoxConstraints(maxHeight: 312),
-              child: PcmDisplay(pcm: state.pcm),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, __) async {
+        bloc?.add(PauseAudioRecorder());
+        if (didPop) return;
+        bool? shouldSave = await SaveOrDiscardDialog.show(context);
+        if (shouldSave == null) return;
+        if (shouldSave) {
+          bloc?.add(SaveAudioRecording());
+        } else {
+          bloc?.add(DiscardAudioRecording());
+        }
+        if (context.mounted) {
+          // ignore: use_build_context_synchronously
+          AppRouter.pop(context);
+        }
+      },
+      child: SizedBox(
+        // height: 500,
+        child: Column(
+          children: [
+            Spacer(),
+            Expanded(
+              flex: 2,
+              child: Container(
+                width: double.maxFinite,
+                constraints: BoxConstraints(maxHeight: 312),
+                child: PcmDisplay(pcm: state.pcm),
+              ),
             ),
-          ),
-          SizedBox(height: 50),
-          TimerDuration(
-            duration: recorderStatus.recordDuration,
-            isRecording: recorderStatus.isRecording,
-          ),
-          SizedBox(height: 35),
+            SizedBox(height: 50),
+            TimerDuration(
+              duration: recorderStatus.recordDuration,
+              isRecording: recorderStatus.isRecording,
+            ),
+            SizedBox(height: 35),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MediaButton(
-                    assetIconPath: AppAssets.icons.plus,
-                    onTap: () {},
-                  ),
-                  SizedBox(height: 24),
-                  MediaButtonLabel("New"),
-                ],
-              ),
-              SizedBox(width: 36),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  RecordButton(
-                    isPaused: !recorderStatus.isRecording,
-                    onTap: () {
-                      if (recorderStatus.isRecording) {
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MediaButton(
+                      assetIconPath: AppAssets.icons.plus,
+                      onTap: () {},
+                    ),
+                    SizedBox(height: 24),
+                    MediaButtonLabel("New"),
+                  ],
+                ),
+                SizedBox(width: 36),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RecordButton(
+                      isPaused: !recorderStatus.isRecording,
+                      onTap: () {
+                        if (recorderStatus.isRecording) {
+                          bloc?.add(PauseAudioRecorder());
+                        } else {
+                          bloc?.add(ResumeAudioRecorder());
+                        }
+                      },
+                    ),
+                    SizedBox(height: 24),
+                    MediaButtonLabel(
+                      recorderStatus.isRecording ? "Pause" : "Resume",
+                    ),
+                  ],
+                ),
+                SizedBox(width: 36),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MediaButton(
+                      assetIconPath: AppAssets.icons.stop,
+                      onTap: () async {
                         bloc?.add(PauseAudioRecorder());
-                      } else {
-                        bloc?.add(ResumeAudioRecorder());
-                      }
-                    },
-                  ),
-                  SizedBox(height: 24),
-                  MediaButtonLabel(
-                    recorderStatus.isRecording ? "Pause" : "Resume",
-                  ),
-                ],
-              ),
-              SizedBox(width: 36),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MediaButton(
-                    assetIconPath: AppAssets.icons.stop,
-                    onTap: () {
-                      bloc?.add(StopAudioRecorder());
-                    },
-                  ),
-                  SizedBox(height: 24),
-                  MediaButtonLabel("Stop"),
-                ],
-              ),
-            ],
-          ),
+                        String? title = await SaveRecordingDialog.show(
+                          context,
+                          defaultText:
+                              "Record ${DateTime.now().toIso8601String()}",
+                        );
 
-          Spacer(),
-        ],
+                        if (title == null) {
+                          bloc?.add(ResumeAudioRecorder());
+                          return;
+                        }
+                        bloc?.add(StopAudioRecorder());
+                        bloc?.add(SaveAudioRecording(title: title));
+                        if (context.mounted) {
+                          // ignore: use_build_context_synchronously
+                          AppRouter.pop(context);
+                        }
+                      },
+                    ),
+                    SizedBox(height: 24),
+                    MediaButtonLabel("Stop"),
+                  ],
+                ),
+              ],
+            ),
+            Spacer(),
+          ],
+        ),
       ),
     );
   }

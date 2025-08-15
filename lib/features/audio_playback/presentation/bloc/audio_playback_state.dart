@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 
 abstract class AudioPlaybackState extends Equatable {}
 
-class AudioPlaybackSLoading extends AudioPlaybackState {
+class AudioPlaybackLoading extends AudioPlaybackState {
   @override
   List<Object?> get props => [];
 }

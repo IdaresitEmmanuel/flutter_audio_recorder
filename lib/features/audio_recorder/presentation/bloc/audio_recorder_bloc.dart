@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audiorecorder/core/presentation/widgets/messenger.dart';
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_status.dart';
@@ -165,6 +166,7 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
         EchoLogger.e(result.error.toString());
       } else {
         EchoLogger.i("Recording Saved");
+        Messenger.showSnackBar("Recording Saved!");
       }
     }
   }

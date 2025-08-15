@@ -1,3 +1,4 @@
+import 'package:audiorecorder/core/presentation/widgets/messenger.dart';
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
 import 'package:audiorecorder/features/audio_playback/domain/entity/audio_file.dart';
@@ -17,7 +18,7 @@ class AudioPlaybackBloc extends Bloc<AudioPlaybackEvent, AudioPlaybackState> {
     this._requestStoragePermissionUsecase,
     this._getAudioFilesUsecase,
     this._deleteAudioFileUsecase,
-  ) : super(AudioPlaybackSLoading()) {
+  ) : super(AudioPlaybackLoading()) {
     on<RequestStoragePermission>(_onRequestStoragePermission);
     on<GetAudioFiles>(_onGetAudioFiles);
     on<DeleteAudioFile>(_onDeleteAudioFile);
@@ -35,10 +36,13 @@ class AudioPlaybackBloc extends Bloc<AudioPlaybackEvent, AudioPlaybackState> {
     }
   }
 
-  Future<void> _onGetAudioFiles(
+  // Future<void>
+  _onGetAudioFiles(
     GetAudioFiles event,
     Emitter<AudioPlaybackState> emit,
   ) async {
+    final hasPermission = await _requestStoragePermissionUsecase();
+    if (hasPermission is! DataSuccess) return;
     final result = await _getAudioFilesUsecase();
     if (result is DataSuccess) {
       final s = (result as DataSuccess<List<AudioFile>>);
@@ -63,6 +67,7 @@ class AudioPlaybackBloc extends Bloc<AudioPlaybackEvent, AudioPlaybackState> {
         );
 
         emit(newState);
+        Messenger.showSnackBar("Audio File deleted!");
       }
       EchoLogger.d("AudioFile ${event.audioFile.title} deleted!");
     } else {

@@ -79,7 +79,7 @@ class _OnboardingComponentState extends State<OnboardingComponent> {
                   sl.get<OnboardingBloc>().add(SetOnboardingStatus());
                   AppRouter.goToAudioPlaybackScreen(
                     context,
-                    routeReplacement: RouteReplacement.all,
+                    routeReplacement: RouteReplacement.current,
                   );
                 },
                 text: "Get Started",

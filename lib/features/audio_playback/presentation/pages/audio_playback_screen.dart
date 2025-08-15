@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AudioPlaybackScreen extends StatelessWidget {
   const AudioPlaybackScreen({super.key});
-  static const path = 'audioPlayback';
+  static const path = '/audioPlayback';
   @override
   Widget build(BuildContext context) {
     // To make widget test on screens that navigate to this work

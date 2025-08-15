@@ -19,6 +19,8 @@ class AppActionButton extends StatelessWidget {
     this.isLoading = false,
     this.loadingSize,
     this.defaultLoading = false,
+    this.borderRadius,
+    this.background,
   }) : assert(
          (text != null && child == null) || (child != null && text == null),
        );
@@ -33,6 +35,8 @@ class AppActionButton extends StatelessWidget {
   final bool isLoading;
   final double? loadingSize;
   final bool defaultLoading;
+  final double? borderRadius;
+  final Color? background;
 
   onSafeTap() {
     if (!isLoading && onPressed != null) {
@@ -44,7 +48,7 @@ class AppActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Platform.isIOS
         ? SizedBox(
-            height: height ?? AppDimensions.defaultButtonHeight,
+            height: height ?? 42,
             width: width,
             child: Container(
               decoration: BoxDecoration(
@@ -55,9 +59,7 @@ class AppActionButton extends StatelessWidget {
                             : Theme.of(context).primaryColor,
                       )
                     : null,
-                borderRadius: BorderRadius.circular(
-                  AppDimensions.defaultButtonHeight / 2,
-                ),
+                borderRadius: BorderRadius.circular(borderRadius ?? 42 / 2),
               ),
               child: CupertinoButton(
                 padding: EdgeInsets.all(0),
@@ -66,9 +68,9 @@ class AppActionButton extends StatelessWidget {
                     ? Colors.transparent
                     : isOdd
                     ? _oddColor(context)
-                    : Theme.of(context).primaryColor,
+                    : background ?? Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(
-                  AppDimensions.defaultButtonHeight / 2,
+                  borderRadius ?? AppDimensions.defaultButtonHeight / 2,
                 ),
                 child: SizedBox(
                   width: double.maxFinite,
@@ -94,11 +96,8 @@ class AppActionButton extends StatelessWidget {
                   ? Colors.transparent
                   : isOdd
                   ? _oddColor(context)
-                  : Theme.of(context).primaryColor,
-              fixedSize: Size(
-                width ?? double.maxFinite,
-                height ?? AppDimensions.defaultButtonHeight,
-              ),
+                  : background ?? Theme.of(context).primaryColor,
+              fixedSize: Size(width ?? double.maxFinite, height ?? 42),
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 side: isHollow
@@ -109,7 +108,7 @@ class AppActionButton extends StatelessWidget {
                       )
                     : BorderSide.none,
                 borderRadius: BorderRadius.circular(
-                  AppDimensions.defaultButtonHeight / 2,
+                  borderRadius ?? AppDimensions.defaultButtonHeight / 2,
                 ),
               ),
             ),
@@ -155,6 +154,7 @@ class AppActionButton extends StatelessWidget {
       text,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
         color: !isHollow && !isOdd ? Colors.white : AppColors.grey700,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

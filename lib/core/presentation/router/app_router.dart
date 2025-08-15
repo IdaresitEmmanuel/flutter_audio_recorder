@@ -60,17 +60,13 @@ class AppRouter {
         return Navigator.popAndPushNamed(context, route, arguments: argument);
 
       case RouteReplacement.all:
-        return Navigator.pushReplacementNamed(
-          context,
-          route,
-          arguments: argument,
-        );
-      case RouteReplacement.none:
         return Navigator.of(context).pushNamedAndRemoveUntil(
           route,
           (Route route) => false,
           arguments: argument,
         );
+      case RouteReplacement.none:
+        return Navigator.pushNamed(context, route, arguments: argument);
     }
   }
 }

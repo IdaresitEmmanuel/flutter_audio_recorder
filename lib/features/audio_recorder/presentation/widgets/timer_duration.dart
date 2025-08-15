@@ -1,4 +1,5 @@
 import 'package:audiorecorder/core/presentation/theme/colors.dart';
+import 'package:audiorecorder/core/util/helper_functions.dart';
 import 'package:flutter/material.dart';
 
 class TimerDuration extends StatelessWidget {
@@ -20,7 +21,6 @@ class TimerDuration extends StatelessWidget {
         ),
         SizedBox(width: 6),
         SizedBox(
-          // width: 218,
           child: Text(
             calculateAndFormatDuration(duration),
             style: Theme.of(context).textTheme.displayLarge,
@@ -30,16 +30,5 @@ class TimerDuration extends StatelessWidget {
     );
   }
 
-  String calculateAndFormatDuration(Duration recordDuration) {
-    var seconds = recordDuration.inSeconds;
-
-    int hours = (seconds / (60 * 60)).floor();
-    int minutes = (seconds / 60).floor();
-    int remSeconds = (seconds % 60);
-
-    String hoursText = hours < 10 ? "0$hours" : "$hours";
-    String minutesText = minutes < 10 ? "0$minutes" : "$minutes";
-    String remSecondsText = remSeconds < 10 ? "0$remSeconds" : "$remSeconds";
-    return "$hoursText:$minutesText:$remSecondsText";
-  }
+ 
 }

@@ -52,7 +52,7 @@ class AudioStorageRepositoryImpl implements AudioStorageRepository {
       final String filePath =
           '${tempDir.path}$audioStoragePath/${audio.title}.wav';
       final File file = _pathFinder.file(filePath);
-
+      await file.create(recursive: true);
       await file.writeAsBytes(fullFileBytes);
       return DataSuccess(unit);
     } catch (e) {
