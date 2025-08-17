@@ -10,7 +10,7 @@ class AudioRecorderStatusModel extends AudioRecorderStatus {
     return AudioRecorderStatusModel(
       isRecording: data['isRecording'],
       recordDuration: Duration(
-        seconds: (data['recordDuration'] as num).toInt(),
+        milliseconds: (data['recordDuration'] as num).toInt(),
       ),
     );
   }

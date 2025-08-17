@@ -4,6 +4,7 @@ import 'package:audiorecorder/core/presentation/theme/colors.dart';
 import 'package:audiorecorder/core/presentation/widgets/app_icon.dart';
 import 'package:audiorecorder/core/presentation/widgets/app_popup_menu.dart';
 import 'package:audiorecorder/core/presentation/widgets/echo_scaffold.dart';
+import 'package:audiorecorder/features/audio_playback/domain/entity/audio_playback_status.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_event.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_state.dart';
@@ -35,6 +36,7 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
     super.initState();
     _scrollController.addListener(_onScroll);
     bloc?.add(GetAudioFiles());
+    bloc?.add(GetAudioPlaybackStatus());
   }
 
   @override
@@ -57,6 +59,7 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
   }
 
   _startRecording() async {
+    bloc?.add(StopAudioPlayer());
     await AppRouter.goToAudioRecorderScreen(context, argument: true);
     bloc?.add(GetAudioFiles());
     await Future.delayed(Duration(seconds: 1), () {
@@ -132,8 +135,12 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
                   },
                   itemBuilder: (context, index) {
                     final audioFile = stateDone.fileList[index];
+                    bool isCurrentFile =
+                        audioFile.title == state.status.fileName;
+
                     return AudioListItem(
                       audioFile: audioFile,
+                      audioPlaybackStatus: isCurrentFile ? state.status : null,
                       onLongPress: (details) {
                         AppPopupMenu.show<String>(
                           context: context,
@@ -151,12 +158,31 @@ class _AudioPlaybackComponentState extends State<AudioPlaybackComponent> {
                           ],
                         );
                       },
+                      onPlayToggle: () {
+                        if (state.status.playerState !=
+                                AudioPlayerState.playing ||
+                            !isCurrentFile) {
+                          bloc?.add(PlayAudioFile(audioFile: audioFile));
+                        } else {
+                          bloc?.add(PauseAudioPlayer());
+                        }
+                      },
+                      seek: (position) {
+                        if (state.status.playerState !=
+                            AudioPlayerState.stopped) {
+                          bloc?.add(SeekToPosition(position: position));
+                        }
+                      },
                     );
                   },
                 );
               },
             ),
-          SliverToBoxAdapter(child: SizedBox(height: fabSize)),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: fabSize + MediaQuery.paddingOf(context).bottom,
+            ),
+          ),
         ],
       ),
     );

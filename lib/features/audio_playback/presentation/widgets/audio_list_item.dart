@@ -3,18 +3,30 @@ import 'package:audiorecorder/core/presentation/theme/dimensions.dart';
 import 'package:audiorecorder/core/presentation/widgets/gradient_box_border.dart';
 import 'package:audiorecorder/core/util/helper_functions.dart';
 import 'package:audiorecorder/features/audio_playback/domain/entity/audio_file.dart';
+import 'package:audiorecorder/features/audio_playback/domain/entity/audio_playback_status.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/widgets/play_pause_button.dart';
+import 'package:audiorecorder/features/audio_playback/presentation/widgets/progress_slider.dart';
 import 'package:flutter/material.dart';
 
 class AudioListItem extends StatelessWidget {
-  const AudioListItem({super.key, required this.audioFile, this.onLongPress});
+  const AudioListItem({
+    super.key,
+    required this.audioFile,
+    required this.audioPlaybackStatus,
+    this.onLongPress,
+    this.onPlayToggle,
+    this.seek,
+  });
   final AudioFile audioFile;
-  final void Function(LongPressEndDetails)? onLongPress;
+  final AudioPlaybackStatus? audioPlaybackStatus;
+  final void Function(LongPressStartDetails)? onLongPress;
+  final void Function()? onPlayToggle;
+  final void Function(Duration position)? seek;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // onLongPressDown: onLongPress,
-      onLongPressEnd: onLongPress,
+      onLongPressStart: onLongPress,
       child: Container(
         padding: EdgeInsets.all(16),
         margin: EdgeInsets.symmetric(horizontal: AppDimensions.pageMargin),
@@ -30,43 +42,70 @@ class AudioListItem extends StatelessWidget {
             ),
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    audioFile.title,
-                    style: Theme.of(context).textTheme.bodySmall,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatDateTime(audioFile.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.normal,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            Row(
               children: [
-                PlayPauseButton(isPlaying: false),
-                const SizedBox(height: 4),
-                Text(
-                  calculateAndFormatDuration(audioFile.duration, false),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.normal,
-                    color: AppColors.textSecondary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        audioFile.title,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        audioPlaybackStatus != null
+                            ? calculateAndFormatDuration(
+                                audioPlaybackStatus!.progressDuration,
+                                false,
+                              )
+                            : formatDateTime(audioFile.createdAt),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.normal,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    PlayPauseButton(
+                      isPlaying:
+                          audioPlaybackStatus?.playerState ==
+                          AudioPlayerState.playing,
+                      onTap: onPlayToggle,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      calculateAndFormatDuration(audioFile.duration, false),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.normal,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
+            if (audioPlaybackStatus != null)
+              PlayerSlider(
+                min: 0,
+                max: audioFile.duration.inSeconds.toDouble(),
+                value:
+                    audioPlaybackStatus?.progressDuration.inSeconds
+                        .toDouble() ??
+                    0,
+                seek: (position) {
+                  if (seek == null) return;
+                  seek!(Duration(seconds: position.toInt()));
+                },
+              ),
           ],
         ),
       ),

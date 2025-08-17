@@ -2,6 +2,7 @@ import 'package:audiorecorder/core/presentation/widgets/messenger.dart';
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
 import 'package:audiorecorder/features/audio_playback/domain/entity/audio_file.dart';
+import 'package:audiorecorder/features/audio_playback/domain/entity/audio_playback_status.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/delete_audio_file.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/get_audio_files.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/get_audio_playback_status_stream.dart';
@@ -67,9 +68,11 @@ class AudioPlaybackBloc extends Bloc<AudioPlaybackEvent, AudioPlaybackState> {
     final result = await _getAudioFilesUsecase();
     if (result is DataSuccess) {
       final s = (result as DataSuccess<List<AudioFile>>);
+      final list = s.data ?? [];
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       final newState = state is AudioPlaybackDone
-          ? (state as AudioPlaybackDone).copyWith(fileList: s.data)
-          : AudioPlaybackDone.initial().copyWith(fileList: s.data ?? []);
+          ? (state as AudioPlaybackDone).copyWith(fileList: list)
+          : AudioPlaybackDone.initial().copyWith(fileList: list);
       emit(newState);
     } else {
       EchoLogger.e(result);
@@ -145,6 +148,12 @@ class AudioPlaybackBloc extends Bloc<AudioPlaybackEvent, AudioPlaybackState> {
   ) async {
     final result = await _stopAudioPlayerUsecase();
     if (result is DataSuccess) {
+      final newState = state is AudioPlaybackDone
+          ? (state as AudioPlaybackDone).copyWith(
+              status: AudioPlaybackStatus.initial(),
+            )
+          : AudioPlaybackDone.initial();
+      emit(newState);
       EchoLogger.d("Audio player stopped!");
     } else {
       EchoLogger.e(result);

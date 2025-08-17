@@ -11,10 +11,14 @@ class AudioPlaybackStatus extends Equatable {
     required this.progressDuration,
   });
 
+  factory AudioPlaybackStatus.initial() => AudioPlaybackStatus(
+    fileName: '',
+    playerState: AudioPlayerState.stopped,
+    progressDuration: Duration.zero,
+  );
+
   @override
   List<Object?> get props => [fileName, playerState, progressDuration];
 }
 
-enum AudioPlayerState {
-  playing, paused, stopped
-}
+enum AudioPlayerState { playing, paused, stopped }

@@ -16,7 +16,7 @@ class AudioRecorder :  NSObject{
     private  let bus = 0
     
     private var timer: DispatchSourceTimer?
-    private var recordDuration: TimeInterval = 0 // in seconds
+    private var recordDuration: TimeInterval = 0 // in milliSeconds
     
     var onWaveformData: (([String: Any]) -> Void)?
     var onRecordStatusData: (([String: Any]) -> Void)?
@@ -67,11 +67,14 @@ class AudioRecorder :  NSObject{
         
         inputNode.removeTap(onBus: self.bus)
         inputNode.installTap(onBus: self.bus, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+            if(self?.timer == nil){
+                self?.startTimer()
+            }
             self?.processAudioBuffer(buffer: buffer)
         }
         
         try? self.audioEngine.start()
-        startTimer()
+        //
         print("Recording started at \(format.sampleRate) Hz")
         sendRecordStatus()
     }
@@ -85,7 +88,7 @@ class AudioRecorder :  NSObject{
     
     func resume() throws {
         try audioEngine.start()
-        startTimer()
+//        startTimer()
         sendRecordStatus()
     }
     
@@ -100,10 +103,10 @@ class AudioRecorder :  NSObject{
     private func startTimer() {
         stopTimer() // ensure no duplicates
         let timer = DispatchSource.makeTimerSource(queue: DispatchQueue.global(qos: .userInitiated))
-        timer.schedule(deadline: .now(), repeating: 0.5) // every 500ms
+        timer.schedule(deadline: .now(), repeating: 0.1) // every 100ms
         timer.setEventHandler { [weak self] in
             guard let self = self else { return }
-            self.recordDuration += 0.5
+            self.recordDuration += 100
         }
         timer.resume()
         self.timer = timer

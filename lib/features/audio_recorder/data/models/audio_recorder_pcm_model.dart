@@ -5,7 +5,7 @@ class AudioRecorderPcmModel extends AudioRecorderPcm {
 
   factory AudioRecorderPcmModel.fromMap(Map<dynamic, dynamic> data) {
     return AudioRecorderPcmModel(
-      timestamp: Duration(seconds: (data['timestamp'] as num).toInt()),
+      timestamp: Duration(milliseconds: (data['timestamp'] as num).toInt()),
       data: (data['data'] as List).map((d) => (d as num).toDouble()).toList(),
     );
   }

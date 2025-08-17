@@ -9,16 +9,9 @@ class PcmDisplay extends StatelessWidget {
   final List<AudioRecorderPcm> pcm;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: CustomPaint(
-            painter: _WaveformPainter(dataList: pcm),
-            child: SizedBox.expand(),
-          ),
-        ),
-        Container(height: 16, color: Colors.grey.withValues(alpha: .5)),
-      ],
+    return CustomPaint(
+      painter: _WaveformPainter(dataList: pcm),
+      child: SizedBox.expand(),
     );
   }
 }
@@ -41,30 +34,41 @@ class _WaveformPainter extends CustomPainter {
 
     double sampleWidth = 4.0;
     int numberOfSamples = (width / sampleWidth).toInt();
+
     var filteredList = dataList
         .map((d) => d.data.map((dd) => dd.abs()).reduce(math.max))
         .toList();
+
     var visibleSamples = filteredList.sublist(
       math.max(0, filteredList.length - numberOfSamples),
     );
 
-    _drawWavePolygons(canvas, painter, sampleWidth, height, visibleSamples);
+    _drawWavePolygons(
+      canvas,
+      painter,
+      width,
+      sampleWidth,
+      height,
+      visibleSamples,
+    );
+    _drawNeedle(width: size.width, height: height, canvas: canvas);
   }
 
   _drawWavePolygons(
     Canvas canvas,
     Paint painter,
+    double width,
     double sampleWidth,
     double height,
     List<double> visibleSamples,
   ) {
     final double maxSampleValue = .09;
     for (int i = 0; i < visibleSamples.length; i++) {
-      final double x = i * sampleWidth;
+      final double x = width - (i * sampleWidth);
 
       // Normalize the sample value and scale it to the canvas height
       final double normalizedY = maxSampleValue > 0
-          ? visibleSamples[i] / maxSampleValue
+          ? visibleSamples.reversed.toList()[i] / maxSampleValue
           : 0;
 
       final double barHeight = (normalizedY * height / 2).abs();
@@ -81,19 +85,23 @@ class _WaveformPainter extends CustomPainter {
       polygonPath.moveTo(x, topYWithLimit);
       polygonPath.lineTo(x, bottomYWithLimit);
       canvas.drawPath(polygonPath, painter);
-
-      if (i == visibleSamples.length - 1) {
-        var painter = Paint()
-          ..color = AppColors.primary
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3
-          ..strokeCap = StrokeCap.round;
-        var polygonPath = Path();
-        polygonPath.moveTo(x, 0);
-        polygonPath.lineTo(x, height);
-        canvas.drawPath(polygonPath, painter);
-      }
     }
+  }
+
+  _drawNeedle({
+    required double width,
+    required double height,
+    required Canvas canvas,
+  }) {
+    var painter = Paint()
+      ..color = AppColors.primary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+    var polygonPath = Path();
+    polygonPath.moveTo(width / 2, 0);
+    polygonPath.lineTo(width / 2, height);
+    canvas.drawPath(polygonPath, painter);
   }
 
   @override

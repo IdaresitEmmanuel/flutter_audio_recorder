@@ -8,7 +8,7 @@ import 'package:audiorecorder/features/audio_playback/domain/repositories/audio_
 import 'package:dartz/dartz.dart';
 
 class AudioPlaybackRepositoryImpl implements AudioPlaybackRepository {
-  final AudioPlayerService _audioPlayerService;
+  final IAudioPlayerService _audioPlayerService;
   AudioPlaybackRepositoryImpl(this._audioPlayerService);
 
   @override

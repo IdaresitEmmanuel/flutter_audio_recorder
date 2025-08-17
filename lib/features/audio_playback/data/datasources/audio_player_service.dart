@@ -17,15 +17,17 @@ class AudioPlayerService extends IAudioPlayerService {
   @override
   Future<bool> play(AudioFile audioFile) async {
     bool isDisposed = _audioPlayer.state == PlayerState.disposed;
+    bool isStopped = _audioPlayer.state == PlayerState.stopped;
+
     final source = DeviceFileSource(audioFile.path);
     bool isSameSource =
         _audioPlayer.source is DeviceFileSource &&
         (_audioPlayer.source as DeviceFileSource).path == source.path;
 
-    if (!isDisposed && isSameSource) {
+    if (!isDisposed && !isStopped && isSameSource) {
       await _audioPlayer.resume();
       return true;
-    } else if (!isSameSource) {
+    } else if (!isSameSource || isStopped) {
       await _audioPlayer.play(source);
       return true;
     }

@@ -20,7 +20,7 @@ class AudioRecorder(
     private var isRecording = false
     private var bufferSize = 0
 
-    private var recordDuration = 0.0 // seconds
+    private var recordDuration = 0.0 //  milliseconds
 
     private var timer: Timer? = null
 
@@ -81,11 +81,11 @@ class AudioRecorder(
         timer?.schedule(object : TimerTask() {
             override fun run() {
                 if (isRecording) {
-                    recordDuration += 0.5 // increase by 50 ms per tick
+                    recordDuration += 100.0 // increase by 100 ms per tick
                     sendStatus()
                 }
             }
-        }, 0L, 500L) // delay=0, period=500ms
+        }, 0L, 100L) // delay=0, period=100ms
     }
 
     private fun stopTimer() {

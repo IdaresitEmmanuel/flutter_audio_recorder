@@ -98,6 +98,7 @@ class AppActionButton extends StatelessWidget {
                   ? _oddColor(context)
                   : background ?? Theme.of(context).primaryColor,
               fixedSize: Size(width ?? double.maxFinite, height ?? 42),
+              padding: EdgeInsets.all(0),
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 side: isHollow

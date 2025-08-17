@@ -16,8 +16,8 @@ import 'package:audiorecorder/features/audio_playback/domain/usecases/pause_audi
 import 'package:audiorecorder/features/audio_playback/domain/usecases/play_audio_file.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/request_storage_permission.dart';
 import 'package:audiorecorder/features/audio_playback/domain/usecases/seek_to_position.dart';
+import 'package:audiorecorder/features/audio_playback/domain/usecases/stop_audio_player.dart';
 import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_bloc.dart';
-import 'package:audiorecorder/features/audio_playback/presentation/bloc/audio_playback_event.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/audio_recorder_service.dart';
 import 'package:audiorecorder/features/audio_recorder/data/datasources/wave_codec_helper.dart';
 import 'package:audiorecorder/features/audio_recorder/data/repositories/audio_recorder_repository_impl.dart';
@@ -178,7 +178,7 @@ _registerUsecases() {
     ..registerSingleton<PlayAudioFileUsecase>(PlayAudioFileUsecase(sl()))
     ..registerSingleton<PauseAudioPlayerUsecase>(PauseAudioPlayerUsecase(sl()))
     ..registerSingleton<SeekToPositionUsecase>(SeekToPositionUsecase(sl()))
-    ..registerSingleton<StopAudioPlayer>(StopAudioPlayer())
+    ..registerSingleton<StopAudioPlayerUsecase>(StopAudioPlayerUsecase(sl()))
     ..registerSingleton<GetAudioPlaybackStatusStreamUsecase>(
       GetAudioPlaybackStatusStreamUsecase(sl()),
     );

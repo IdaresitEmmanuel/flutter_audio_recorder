@@ -2,27 +2,27 @@ import 'package:audiorecorder/core/presentation/theme/colors.dart';
 import 'package:audiorecorder/core/presentation/widgets/app_action_button.dart';
 import 'package:flutter/material.dart';
 
-class SaveOrDiscardDialog {
+class RestartRecordingDialog {
   /// Returns true if the positive button is clicked
   /// Returns false if the negative button is clicked
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool?>(
       context: context,
-      builder: (_) => _SaveOrDiscardDialogWidget(),
+      builder: (_) => _RestartRecordingDialogWidget(),
     );
   }
 }
 
-class _SaveOrDiscardDialogWidget extends StatefulWidget {
-  const _SaveOrDiscardDialogWidget();
+class _RestartRecordingDialogWidget extends StatefulWidget {
+  const _RestartRecordingDialogWidget();
 
   @override
-  State<_SaveOrDiscardDialogWidget> createState() =>
-      _SaveOrDiscardDialogWidgetState();
+  State<_RestartRecordingDialogWidget> createState() =>
+      _RestartRecordingDialogWidgetState();
 }
 
-class _SaveOrDiscardDialogWidgetState
-    extends State<_SaveOrDiscardDialogWidget> {
+class _RestartRecordingDialogWidgetState
+    extends State<_RestartRecordingDialogWidget> {
   @override
   void initState() {
     super.initState();
@@ -43,20 +43,40 @@ class _SaveOrDiscardDialogWidgetState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Text(
-                  "Save your recording or discard it?",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
-                ),
-              ],
+            Text(
+              "Save and restart or restart your recording?",
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
+              textAlign: TextAlign.center,
             ),
 
             const SizedBox(height: 24),
-            Row(
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
+                Flexible(
+                  child: AppActionButton(
+                    text: "Discard & Restart",
+                    borderRadius: 8,
+                    background: AppColors.primary,
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                  ),
+                ),
+
+                Flexible(
+                  child: AppActionButton(
+                    text: "Save & Restart",
+                    borderRadius: 8,
+                    background: AppColors.secondary,
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                  ),
+                ),
+
                 Flexible(
                   child: AppActionButton(
                     text: "Cancel",
@@ -65,29 +85,6 @@ class _SaveOrDiscardDialogWidgetState
                     isOdd: true,
                     onPressed: () {
                       Navigator.pop(context);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: AppActionButton(
-                    text: "Discard",
-                    borderRadius: 8,
-                    background: AppColors.primary,
-                    onPressed: () {
-                      Navigator.pop(context, false);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Spacer(),
-                Flexible(
-                  child: AppActionButton(
-                    text: "Save",
-                    borderRadius: 8,
-                    background: AppColors.secondary,
-                    onPressed: () {
-                      Navigator.pop(context, true);
                     },
                   ),
                 ),

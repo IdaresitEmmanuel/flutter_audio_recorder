@@ -135,6 +135,7 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
               ),
               pcm: [pcm],
             );
+      // print("new State $newState");
       emit(newState);
     }
   }

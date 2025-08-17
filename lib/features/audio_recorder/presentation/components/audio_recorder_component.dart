@@ -4,8 +4,10 @@ import 'package:audiorecorder/core/presentation/widgets/echo_scaffold.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_bloc.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_event.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_recorder_state.dart';
+import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/restart_recording_dialog.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/save_or_discard_dialog.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/save_recording_dialog.dart';
+import 'package:audiorecorder/features/audio_recorder/presentation/widgets/calibrated_time_stamp.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/media_button_label.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/pcm_display.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/record_button.dart';
@@ -90,7 +92,16 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
               child: Container(
                 width: double.maxFinite,
                 constraints: BoxConstraints(maxHeight: 312),
-                child: PcmDisplay(pcm: state.pcm),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(child: PcmDisplay(pcm: state.pcm)),
+                    SizedBox(
+                      height: 16,
+                      child: CalibratedTimeStamp(pcm: state.pcm),
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 50),
@@ -108,7 +119,22 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
                   children: [
                     MediaButton(
                       assetIconPath: AppAssets.icons.plus,
-                      onTap: () {},
+                      onTap: () async {
+                        bloc?.add(PauseAudioRecorder());
+                        bool? result = await RestartRecordingDialog.show(
+                          context,
+                        );
+                        if (result == null) {
+                          bloc?.add(ResumeAudioRecorder());
+                          return;
+                        }
+                        if (result) {
+                          bloc?.add(SaveAudioRecording());
+                        } else {
+                          bloc?.add(DiscardAudioRecording());
+                        }
+                        bloc?.add(RestartAudioRecording());
+                      },
                     ),
                     SizedBox(height: 24),
                     MediaButtonLabel("New"),
