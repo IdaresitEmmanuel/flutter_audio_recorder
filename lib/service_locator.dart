@@ -1,4 +1,4 @@
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:audiorecorder/core/platform_channels/platform_channels.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/audio_player_service.dart';
 import 'package:audiorecorder/features/audio_playback/data/datasources/audio_tag_helper.dart';
@@ -44,6 +44,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;

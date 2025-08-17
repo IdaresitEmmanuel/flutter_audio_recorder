@@ -39,6 +39,7 @@ class MockGetRecorderStatusStreamUsecase extends Mock
 class MockSaveRecordingUsecase extends Mock implements SaveRecordingUsecase {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final mockRequestRecordPermissionUsecase =
       MockRequestRecordPermissionUsecase();
   final mockStartRecordingUsecase = MockStartRecordingUsecase();

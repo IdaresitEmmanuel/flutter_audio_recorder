@@ -43,15 +43,12 @@ class _SaveOrDiscardDialogWidgetState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Text(
-                  "Save your recording or discard it?",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
-                ),
-              ],
+            Text(
+              "Save your recording or discard it?",
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w400),
+              textAlign: TextAlign.center,
             ),
 
             const SizedBox(height: 24),

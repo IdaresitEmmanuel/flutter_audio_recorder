@@ -46,7 +46,7 @@ void main() {
       verify(() => mockAudioRecorderService.requestPermission());
     });
   });
-  
+
   group('startRecording', () {
     test('should return DataSuccess when result is true', () async {
       when(
@@ -191,11 +191,11 @@ void main() {
     ];
     final models = [
       AudioRecorderPcmModel(
-        timestamp: Duration(seconds: 38.4.toInt()),
+        timestamp: Duration(milliseconds: 38.4.toInt()),
         data: [0.9, 0.38, -33],
       ),
       AudioRecorderPcmModel(
-        timestamp: Duration(seconds: 15.4.toInt()),
+        timestamp: Duration(milliseconds: 15.4.toInt()),
         data: [-0.09, 1.38, -0.00033],
       ),
     ];
@@ -220,11 +220,11 @@ void main() {
     final models = [
       AudioRecorderStatusModel(
         isRecording: true,
-        recordDuration: Duration(seconds: 45.6.toInt()),
+        recordDuration: Duration(milliseconds: 45.6.toInt()),
       ),
       AudioRecorderStatusModel(
         isRecording: false,
-        recordDuration: Duration(seconds: 456.2.toInt()),
+        recordDuration: Duration(milliseconds: 456.2.toInt()),
       ),
     ];
 

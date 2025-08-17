@@ -39,6 +39,7 @@ class MockGetAudioPlaybackStatusStreamUsecase extends Mock
     implements GetAudioPlaybackStatusStreamUsecase {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   final mockRequestStoragePermissionUsecase =
       MockRequestStoragePermissionUsecase();
   final mockGetAudioFilesUsecase = MockGetAudioFilesUsecase();

@@ -1,5 +1,6 @@
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:audiorecorder/features/audio_playback/domain/entity/audio_file.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class IAudioPlayerService {
@@ -16,45 +17,32 @@ class AudioPlayerService extends IAudioPlayerService {
 
   @override
   Future<bool> play(AudioFile audioFile) async {
-    bool isDisposed = _audioPlayer.state == PlayerState.disposed;
-    bool isStopped = _audioPlayer.state == PlayerState.stopped;
+    final audioSource = AudioSource.uri(Uri.file(audioFile.path));
 
-    final source = DeviceFileSource(audioFile.path);
-    bool isSameSource =
-        _audioPlayer.source is DeviceFileSource &&
-        (_audioPlayer.source as DeviceFileSource).path == source.path;
+    final currentAudioSource = _audioPlayer.audioSource;
+    final isSameSource =
+        currentAudioSource is UriAudioSource &&
+        currentAudioSource.uri.path == audioSource.uri.path;
 
-    if (!isDisposed && !isStopped && isSameSource) {
-      await _audioPlayer.resume();
-      return true;
-    } else if (!isSameSource || isStopped) {
-      await _audioPlayer.play(source);
-      return true;
+    if (!isSameSource) {
+      await _audioPlayer.setAudioSource(audioSource, preload: true);
     }
-    return false;
+
+    await _audioPlayer.play();
+    return true;
   }
 
   @override
   Future<bool> pause() async {
-    bool isDisposed = _audioPlayer.state == PlayerState.disposed;
-
-    if (!isDisposed && _audioPlayer.source != null) {
-      await _audioPlayer.pause();
-      return true;
-    }
-    return false;
+    if (_audioPlayer.audioSource == null) return false;
+    await _audioPlayer.pause();
+    return true;
   }
 
   @override
   Future<bool> seek(Duration seekDuration) async {
-    bool isPlaying = _audioPlayer.state == PlayerState.playing;
-    bool isPaused = _audioPlayer.state == PlayerState.paused;
-    bool hasFile = isPlaying || isPaused;
-    if (hasFile) {
-      await _audioPlayer.seek(seekDuration);
-      return true;
-    }
-    return false;
+    await _audioPlayer.seek(seekDuration);
+    return true;
   }
 
   @override
@@ -65,28 +53,41 @@ class AudioPlayerService extends IAudioPlayerService {
 
   @override
   Stream<Map<String, dynamic>> playbackStatus() {
-    String? getSourceName() {
-      if (_audioPlayer.source == null) return null;
-      if (_audioPlayer.source is! DeviceFileSource) return null;
-      return (_audioPlayer.source as DeviceFileSource).path.split('/').last;
+    String? getFileName() {
+      // just_audio does not expose the file path directly in the AudioSource.
+      // You may need to manage the filename separately if needed for the UI.
+      final audioSource = _audioPlayer.audioSource;
+      if (audioSource is UriAudioSource) {
+        return audioSource.uri.pathSegments.last;
+      }
+      return null;
     }
 
-    final stateStream = _audioPlayer.onPlayerStateChanged.startWith(
-      PlayerState.stopped,
+    final stateStream = _audioPlayer.playerStateStream.startWith(
+      _audioPlayer.playerState,
     );
-    final positionStream = _audioPlayer.onPositionChanged.startWith(
-      Duration.zero,
-    );
-    return Rx.combineLatest2(stateStream, positionStream, (state, position) {
-      bool isPlaying = state == PlayerState.playing;
-      bool isPaused = state == PlayerState.paused;
+    final positionStream = _audioPlayer.positionStream.startWith(Duration.zero);
+
+    return Rx.combineLatest2(stateStream, positionStream, (
+      playerState,
+      position,
+    ) {
+      String state;
+      // Use a switch on the processingState for more granular control.
+      switch (playerState.processingState) {
+        case ProcessingState.ready:
+        case ProcessingState.buffering:
+          state = playerState.playing ? 'playing' : 'paused';
+          break;
+        case ProcessingState.completed:
+        case ProcessingState.idle:
+        case ProcessingState.loading:
+          state = 'stopped';
+          break;
+      }
       return {
-        'fileName': getSourceName().toString(),
-        'state': isPlaying
-            ? 'playing'
-            : isPaused
-            ? 'paused'
-            : 'stopped',
+        'fileName': state == 'stopped' ? '' : getFileName() ?? "",
+        'state': state,
         'position': position.inSeconds,
       };
     });

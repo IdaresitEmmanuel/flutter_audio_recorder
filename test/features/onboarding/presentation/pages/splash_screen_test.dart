@@ -66,7 +66,7 @@ void main() {
         expect(find.byKey(ValueKey('splash')), findsOneWidget);
 
         // Trigger navigation by emitting the state
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         expect(find.byKey(ValueKey('audioPlayback')), findsOneWidget);
       },

@@ -49,7 +49,7 @@ class AudioRecorder(
         isRecording = true
         recordDuration = 0.0
 
-        startTimer()
+
         startReading()
     }
 
@@ -100,6 +100,9 @@ class AudioRecorder(
             while (isRecording) {
                 val read = audioRecord?.read(buffer, 0, buffer.size) ?: 0
                 if (read > 0) {
+                    if(timer == null){
+                        startTimer()
+                    }
                     val normalized = buffer.take(read).map { it.toDouble() / Short.MAX_VALUE }
                     val model = RecordWaveformModel(timestamp = recordDuration, data = normalized)
                     recorderWaveformEventStreamHandler.send(model.toMap())
