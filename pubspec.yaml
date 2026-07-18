@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: ^3.10.1
 
 dependencies:
   flutter:
@@ -44,6 +44,8 @@ dependencies:
   intl: ^0.20.2
   audioplayers: ^6.5.0
   just_audio: ^0.10.4
+  linked_scroll_controller: ^0.2.0
+  vector_math: ^2.2.0
   # audiotags: ^1.4.5
 
 dev_dependencies:

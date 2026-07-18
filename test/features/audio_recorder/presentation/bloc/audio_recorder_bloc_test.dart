@@ -51,6 +51,7 @@ void main() {
       MockGetRecorderStatusStreamUsecase();
   final mockSaveRecordingUsecase = MockSaveRecordingUsecase();
 
+  // MARK: Request Record Permission
   blocTest(
     '_onRequestRecordPermission: should call request permission',
     build: () => AudioRecorderBloc(
@@ -74,6 +75,7 @@ void main() {
     },
   );
 
+  // MARK: Start Recorder
   blocTest(
     '_onStartAudioRecorder: should call start recorder and emit error state on error',
     build: () => AudioRecorderBloc(
@@ -101,6 +103,7 @@ void main() {
     expect: () => [isA<AudioRecordStateError>()],
   );
 
+  // MARK: Pause Recorder
   blocTest(
     '_onPauseAudioRecorder: should call pause',
     build: () => AudioRecorderBloc(
@@ -124,6 +127,7 @@ void main() {
     },
   );
 
+  // MARK: Resume Recorder
   blocTest(
     '_onResumeAudioRecorder: should call resume',
     build: () => AudioRecorderBloc(
@@ -147,6 +151,7 @@ void main() {
     },
   );
 
+  // MARK: Stop Recorder
   blocTest(
     '_onStopAudioRecorder: should call stop',
     build: () => AudioRecorderBloc(
@@ -170,7 +175,8 @@ void main() {
     },
   );
 
-  group('_onGetPcmStreamUsecase', () {
+  // MARK: Get Pcm Stream
+  group('_onGetAudioRecorderPcmStream', () {
     final entity = AudioRecorderPcm(timestamp: Duration.zero, data: []);
     blocTest(
       'should call pcm stream and emit active state',
@@ -197,6 +203,7 @@ void main() {
     );
   });
 
+  // MARK: GetStatusStream
   group('_onGetAudioRecorderStatusStream', () {
     final entity = AudioRecorderStatus(
       isRecording: true,
@@ -227,6 +234,7 @@ void main() {
     );
   });
 
+  // MARK: Save Audio
   group('_onSaveAudioRecording', () {
     final title = "Record 01";
     final audioSave = AudioSave(data: [], title: title);
@@ -254,6 +262,7 @@ void main() {
     );
   });
 
+  // MARK: Discard Audio
   blocTest(
     'should discard and emit active initial state',
     build: () => AudioRecorderBloc(
@@ -271,6 +280,7 @@ void main() {
     expect: () => [AudioRecorderStateActive.initial()],
   );
 
+  // MARK: RESTART
   group('_onRestartAudioRecording', () {
     blocTest(
       'should return function when stopRecorder return error',

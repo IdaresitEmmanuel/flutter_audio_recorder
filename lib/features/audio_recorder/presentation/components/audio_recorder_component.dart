@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audiorecorder/core/presentation/assets/app_assets.dart';
 import 'package:audiorecorder/core/presentation/router/app_router.dart';
 import 'package:audiorecorder/core/presentation/widgets/echo_scaffold.dart';
@@ -7,7 +9,7 @@ import 'package:audiorecorder/features/audio_recorder/presentation/bloc/audio_re
 import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/restart_recording_dialog.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/save_or_discard_dialog.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/dialogs/save_recording_dialog.dart';
-import 'package:audiorecorder/features/audio_recorder/presentation/widgets/calibrated_time_stamp.dart';
+import 'package:audiorecorder/features/audio_recorder/presentation/utils/needle_controller.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/media_button_label.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/pcm_display.dart';
 import 'package:audiorecorder/features/audio_recorder/presentation/widgets/record_button.dart';
@@ -28,6 +30,11 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
   AudioRecorderBloc? get bloc => !sl.isRegistered<AudioRecorderBloc>()
       ? null
       : BlocProvider.of<AudioRecorderBloc>(context);
+  NeedleController needleController = NeedleController();
+  final pausedDurationController = StreamController<Duration>.broadcast();
+  Stream<Duration> get pausedDurationStream => pausedDurationController.stream;
+
+  StreamSubscription? _stateStreamSubscription;
 
   @override
   void initState() {
@@ -36,6 +43,28 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
     if (widget.shouldStartRecording) {
       bloc?.add(StartAudioRecorder());
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      needleController.setDurationCallback(_updateDuration);
+      _stateStreamSubscription?.cancel();
+      _stateStreamSubscription = bloc?.stream.listen((state) {
+        if (state is AudioRecorderStateActive) {
+          pausedDurationController.add(state.recorderStatus.recordDuration);
+        }
+      });
+    });
+  }
+
+  @override
+  dispose() {
+    _stateStreamSubscription?.cancel();
+    pausedDurationController.close();
+    super.dispose();
+  }
+
+  _updateDuration(Duration duration) {
+    // setState(() {
+    pausedDurationController.add(duration);
+    // });
   }
 
   @override
@@ -92,25 +121,35 @@ class _AudioRecorderComponentState extends State<AudioRecorderComponent> {
               child: Container(
                 width: double.maxFinite,
                 constraints: BoxConstraints(maxHeight: 312),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(child: PcmDisplay(pcm: state.pcm)),
-                    SizedBox(
-                      height: 16,
-                      child: CalibratedTimeStamp(pcm: state.pcm),
-                    ),
-                  ],
-                ),
+                child: bloc == null
+                    ? SizedBox.shrink()
+                    : StreamBuilder(
+                        stream: bloc!.pcmStream,
+                        builder: (context, asyncSnapshot) {
+                          return PcmDisplay(
+                            pcm: asyncSnapshot.data ?? [],
+                            isRecording: state.recorderStatus.isRecording,
+                            needleController: needleController,
+                          );
+                        },
+                      ),
               ),
             ),
             SizedBox(height: 50),
-            TimerDuration(
-              duration: recorderStatus.recordDuration,
-              isRecording: recorderStatus.isRecording,
+            StreamBuilder(
+              stream: pausedDurationStream,
+              builder: (context, asyncSnapshot) {
+                var duration = state.recorderStatus.isRecording
+                    ? recorderStatus.recordDuration
+                    : asyncSnapshot.data ?? recorderStatus.recordDuration;
+                return TimerDuration(
+                  duration: duration,
+                  isRecording: recorderStatus.isRecording,
+                );
+              },
             ),
             SizedBox(height: 35),
-
+            // *********** CONTROLS *********** //
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

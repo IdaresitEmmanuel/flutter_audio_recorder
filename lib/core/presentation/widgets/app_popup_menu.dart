@@ -3,6 +3,7 @@ import 'package:audiorecorder/core/presentation/theme/dimensions.dart';
 import 'package:audiorecorder/core/presentation/widgets/app_ink_well.dart';
 import 'package:audiorecorder/core/presentation/widgets/gradient_box_border.dart';
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
 
 class AppPopupMenu<T> {
   static OverlayEntry? overlay;
@@ -129,7 +130,9 @@ class __OptionsBubbleState<T> extends State<_PopupMenuWidget<T>>
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
-            ..scale(scaleAnimation.value, scaleAnimation.value),
+            ..scaleByVector3(
+              vector.Vector3(scaleAnimation.value, scaleAnimation.value, 1),
+            ),
           child: Opacity(
             // opacity: opacityAnimation.value,
             opacity: 1,

@@ -3,8 +3,8 @@ import 'package:audiorecorder/core/presentation/widgets/app_action_button.dart';
 import 'package:flutter/material.dart';
 
 class RestartRecordingDialog {
-  /// Returns true if the positive button is clicked
-  /// Returns false if the negative button is clicked
+  /// Returns true TO DISCARD AND RESTART
+  /// Returns false TO SAVE AND RESTART
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool?>(
       context: context,
@@ -65,7 +65,7 @@ class _RestartRecordingDialogWidgetState
                     },
                   ),
                 ),
-
+                const SizedBox(height: 8),
                 Flexible(
                   child: AppActionButton(
                     text: "Save & Restart",
@@ -76,7 +76,7 @@ class _RestartRecordingDialogWidgetState
                     },
                   ),
                 ),
-
+                const SizedBox(height: 8),
                 Flexible(
                   child: AppActionButton(
                     text: "Cancel",

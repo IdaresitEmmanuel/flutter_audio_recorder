@@ -7,9 +7,12 @@ abstract class AudioRecorderState extends Equatable {}
 
 class AudioRecorderStateActive extends AudioRecorderState {
   final AudioRecorderStatus recorderStatus;
-  final List<AudioRecorderPcm> pcm;
+  // final List<AudioRecorderPcm> pcm;
 
-  AudioRecorderStateActive({required this.recorderStatus, required this.pcm});
+  AudioRecorderStateActive({
+    required this.recorderStatus,
+    // , required this.pcm
+  });
 
   AudioRecorderStateActive copyWith({
     AudioRecorderStatus? recorderStatus,
@@ -17,7 +20,7 @@ class AudioRecorderStateActive extends AudioRecorderState {
   }) {
     return AudioRecorderStateActive(
       recorderStatus: recorderStatus ?? this.recorderStatus,
-      pcm: pcm ?? this.pcm,
+      // pcm: pcm ?? this.pcm,
     );
   }
 
@@ -26,11 +29,14 @@ class AudioRecorderStateActive extends AudioRecorderState {
       isRecording: false,
       recordDuration: Duration.zero,
     ),
-    pcm: [],
+    // pcm: [],
   );
 
   @override
-  List<Object?> get props => [recorderStatus, pcm];
+  List<Object?> get props => [
+    recorderStatus,
+    // , pcm
+  ];
 }
 
 class AudioRecordStateError extends AudioRecorderState {

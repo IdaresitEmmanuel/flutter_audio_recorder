@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audiorecorder/core/presentation/widgets/messenger.dart';
 import 'package:audiorecorder/core/resources/data_state.dart';
 import 'package:audiorecorder/core/util/echo_logger.dart';
+import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_pcm.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_recorder_status.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/entities/audio_save.dart';
 import 'package:audiorecorder/features/audio_recorder/domain/usecases/get_pcm_stream.dart';
@@ -49,11 +50,25 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     on<RestartAudioRecording>(_onRestartAudioRecording);
   }
 
+  // Audio Pcm here to avoid slowing down the UI with too many state updates
+  List<AudioRecorderPcm> pcmList = [];
+  final pcmStreamController =
+      StreamController<List<AudioRecorderPcm>>.broadcast()..add([]);
+  Stream<List<AudioRecorderPcm>> get pcmStream => pcmStreamController.stream;
+
+  @override
+  Future<void> close() async {
+    pcmList.clear();
+    pcmStreamController.close();
+    await super.close();
+  }
+
   init() async {
     add(GetAudioRecorderPcmStream());
     add(GetAudioRecorderStatusStream());
   }
 
+  // MARK: Request Record Permission
   Future<void> _onRequestRecordPermission(
     RequestRecordPermission event,
     Emitter<AudioRecorderState> emit,
@@ -126,17 +141,20 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     await for (final pcm in _pcmStreamUsecase()) {
       final newState = state is AudioRecorderStateActive
           ? (state as AudioRecorderStateActive).copyWith(
-              pcm: [...(state as AudioRecorderStateActive).pcm, pcm],
+              // pcm: [...(state as AudioRecorderStateActive).pcm, pcm],
             )
           : AudioRecorderStateActive(
               recorderStatus: AudioRecorderStatus(
                 isRecording: true,
                 recordDuration: pcm.timestamp,
               ),
-              pcm: [pcm],
+              // pcm: [pcm],
             );
       // print("new State $newState");
       emit(newState);
+      // Update the pcmList and add to the stream
+      pcmList.add(pcm);
+      pcmStreamController.add(pcmList);
     }
   }
 
@@ -149,7 +167,10 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     await for (final status in _recorderStatusStreamUsecase()) {
       final newState = state is AudioRecorderStateActive
           ? (state as AudioRecorderStateActive).copyWith(recorderStatus: status)
-          : AudioRecorderStateActive(recorderStatus: status, pcm: []);
+          : AudioRecorderStateActive(
+              recorderStatus: status,
+              // , pcm: []
+            );
       emit(newState);
     }
   }
@@ -159,13 +180,13 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     Emitter<AudioRecorderState> emit,
   ) async {
     if (state is AudioRecorderStateActive) {
-      final activeState = state as AudioRecorderStateActive;
       final title = event.title ?? "Record ${DateTime.now().toIso8601String()}";
-      final audioSave = AudioSave(data: activeState.pcm, title: title);
+      final audioSave = AudioSave(data: pcmList, title: title);
       final result = await _saveRecordingUsecase(params: audioSave);
       if (result is DataFailure) {
         EchoLogger.e(result.error.toString());
       } else {
+        _clearPcmList();
         EchoLogger.i("Recording Saved");
         Messenger.showSnackBar("Recording Saved!");
       }
@@ -177,6 +198,7 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     Emitter<AudioRecorderState> emit,
   ) async {
     if (state is AudioRecorderStateActive) {
+      _clearPcmList();
       emit(AudioRecorderStateActive.initial());
     }
   }
@@ -198,5 +220,10 @@ class AudioRecorderBloc extends Bloc<AudioRecorderEvent, AudioRecorderState> {
     } else {
       EchoLogger.i("Recording Saved");
     }
+  }
+
+  void _clearPcmList() {
+    pcmList.clear();
+    pcmStreamController.add([]);
   }
 }
